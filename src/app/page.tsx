@@ -18,11 +18,11 @@ export default async function Home() {
       <div className="bg-gradient-to-br from-zinc-900 via-zinc-900 to-black text-white">
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
           <div className="inline-block mb-3 rounded-full bg-white/10 px-4 py-0.5 text-sm tracking-widest">
-            FOR FRIENDS ONLY
+            FOR DEVELOPERS
           </div>
           <h1 className="text-6xl font-semibold tracking-tighter">Marketplace</h1>
           <p className="mt-4 max-w-md mx-auto text-lg text-zinc-400">
-            Buy and sell with people you actually trust. No strangers.
+            Buy, sell, and trade dev tools, domains, side projects, and more.
           </p>
 
           <div className="mt-8 flex justify-center gap-4">
@@ -30,13 +30,13 @@ export default async function Home() {
               href="/listings"
               className="rounded-full bg-white px-8 py-3 text-sm font-medium text-black transition hover:bg-zinc-200"
             >
-              Browse everything
+              Browse listings
             </Link>
             <Link
               href="/listings/new"
               className="rounded-full border border-white/30 px-8 py-3 text-sm font-medium hover:bg-white/10"
             >
-              Sell something
+              List something
             </Link>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <div className="text-sm text-blue-600 font-medium tracking-wide">JUST DROPPED</div>
+            <div className="text-sm text-blue-600 font-medium tracking-wide">RECENT</div>
             <h2 className="text-3xl font-semibold tracking-tight">Fresh listings</h2>
           </div>
           <Link href="/listings" className="text-sm font-medium hover:underline">
@@ -55,7 +55,7 @@ export default async function Home() {
         </div>
 
         {listings.length === 0 ? (
-          <div className="py-20 text-center text-zinc-500">No listings yet. Be the first to sell something!</div>
+          <div className="py-20 text-center text-zinc-500">No listings yet. Be the first to list something!</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {listings.map((listing) => (

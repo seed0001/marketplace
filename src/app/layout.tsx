@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Marketplace",
-  description: "A marketplace for friends",
+  description: "Buy, sell, trade dev tools, domains, side projects & more",
 };
 
 export default function RootLayout({
