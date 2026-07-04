@@ -34,7 +34,10 @@ export default async function ListingsPage(props: {
     where,
     orderBy,
     take: 50,
-    include: { user: { select: { id: true, name: true, image: true } } },
+    include: {
+      user: { select: { id: true, name: true, image: true } },
+      reviews: { select: { quality: true, usability: true, value: true } },
+    },
   });
 
   const categories = await prisma.listing.findMany({

@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { formatPrice, formatDate } from "@/lib/utils";
+import { formatPrice, formatDate, summarizeReviews } from "@/lib/utils";
 import { ListingActions } from "./ListingActions";
+import { ReviewForm } from "./ReviewForm";
+import { StarRating } from "@/components/StarRating";
 import { auth } from "@/lib/auth";
 import { SectionRenderer } from "@/components/listing-sections/SectionRenderer";
 import { parseReadme } from "@/lib/listing-sections";
@@ -27,6 +29,11 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   if (!listing) notFound();
 
   const isOwner = session?.user?.id === listing.userId;
+  const reviewSummary = summarizeReviews(listing.reviews);
+  const myReview = session?.user?.id
+    ? listing.reviews.find((r) => r.author.id === session.user!.id) ?? null
+    : null;
+  const canReview = Boolean(session?.user?.id) && !isOwner;
   const readmeSections = listing.readme ? parseReadme(listing.readme) : [];
   const manualSections = listing.sections as Section[] | null;
   const hasContent = readmeSections.length > 0 || (manualSections && manualSections.length > 0);
@@ -111,24 +118,78 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
       )}
 
       {/* Reviews */}
-      {listing.reviews.length > 0 && (
-        <section className="mt-14 pt-10 border-t">
-          <h2 className="text-lg font-semibold mb-5">
-            Reviews <span className="text-zinc-400 font-normal">({listing.reviews.length})</span>
+      <section className="mt-14 pt-10 border-t">
+        <div className="flex items-center justify-between mb-5 max-w-3xl">
+          <h2 className="text-lg font-semibold">
+            Reviews <span className="text-zinc-400 font-normal">({reviewSummary.count})</span>
           </h2>
+          {reviewSummary.count > 0 && (
+            <div className="flex items-center gap-2">
+              <StarRating value={reviewSummary.overall} />
+              <span className="text-sm font-medium">{reviewSummary.overall.toFixed(1)}</span>
+            </div>
+          )}
+        </div>
+
+        {reviewSummary.count > 0 && (
+          <div className="mb-6 grid gap-2.5 max-w-md">
+            {([
+              ["Quality", reviewSummary.quality],
+              ["Usability", reviewSummary.usability],
+              ["Value", reviewSummary.value],
+            ] as const).map(([label, val]) => (
+              <div key={label} className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-zinc-600">{label}</span>
+                <span className="flex items-center gap-2">
+                  <StarRating value={val} />
+                  <span className="w-7 text-right text-zinc-500">{val.toFixed(1)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {canReview && (
+          <div className="mb-8 max-w-3xl">
+            <ReviewForm
+              listingId={listing.id}
+              initial={
+                myReview
+                  ? {
+                      quality: myReview.quality,
+                      usability: myReview.usability,
+                      value: myReview.value,
+                      comment: myReview.comment ?? "",
+                    }
+                  : null
+              }
+            />
+          </div>
+        )}
+
+        {listing.reviews.length > 0 ? (
           <div className="space-y-4 max-w-3xl">
             {listing.reviews.map((review) => (
               <div key={review.id} className="rounded-xl border bg-white p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">{review.author.name}</span>
-                  <span className="text-amber-500 text-sm">{'★'.repeat(review.rating)}</span>
+                  <StarRating value={review.rating} />
+                </div>
+                <div className="mb-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-zinc-400">
+                  <span>Quality {review.quality}</span>
+                  <span>Usability {review.usability}</span>
+                  <span>Value {review.value}</span>
                 </div>
                 {review.comment && <p className="text-sm text-zinc-600">{review.comment}</p>}
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="max-w-3xl text-sm text-zinc-500">
+            No reviews yet.{canReview ? " Be the first to leave one." : ""}
+          </p>
+        )}
+      </section>
     </div>
   );
 }

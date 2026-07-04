@@ -9,7 +9,10 @@ export default async function Home() {
     where: { status: "active" },
     orderBy: { createdAt: "desc" },
     take: 12,
-    include: { user: { select: { id: true, name: true, image: true } } },
+    include: {
+      user: { select: { id: true, name: true, image: true } },
+      reviews: { select: { quality: true, usability: true, value: true } },
+    },
   });
 
   return (

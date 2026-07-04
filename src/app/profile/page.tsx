@@ -14,6 +14,7 @@ type Listing = {
   status: string;
   createdAt: string;
   user: { id: string; name?: string | null; image?: string | null };
+  reviews?: { quality: number; usability: number; value: number }[] | null;
 };
 
 export default function ProfilePage() {

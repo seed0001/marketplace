@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, summarizeReviews } from "@/lib/utils";
+import { StarRating } from "@/components/StarRating";
 
 type Listing = {
   id: string;
@@ -10,9 +11,11 @@ type Listing = {
   adult?: boolean | null;
   createdAt: Date | string;
   user: { id: string; name?: string | null; image?: string | null };
+  reviews?: { quality: number; usability: number; value: number }[] | null;
 };
 
 export function ListingCard({ listing }: { listing: Listing }) {
+  const reviews = summarizeReviews(listing.reviews);
   return (
     <Link
       href={`/listings/${listing.id}`}
@@ -46,6 +49,29 @@ export function ListingCard({ listing }: { listing: Listing }) {
 
       <div className="p-4">
         <div className="font-semibold tracking-tight text-lg leading-tight truncate pr-1">{listing.title}</div>
+
+        {reviews.count > 0 ? (
+          <div className="mt-1.5 space-y-1">
+            <div className="flex items-center gap-1.5">
+              <StarRating value={reviews.overall} />
+              <span className="text-xs font-medium text-zinc-600">{reviews.overall.toFixed(1)}</span>
+              <span className="text-xs text-zinc-400">({reviews.count})</span>
+            </div>
+            <div className="space-y-0.5 text-[11px] text-zinc-500">
+              <div className="flex items-center justify-between gap-2">
+                <span>Usability</span>
+                <StarRating value={reviews.usability} size="xs" />
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span>Value</span>
+                <StarRating value={reviews.value} size="xs" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-1.5 text-xs text-zinc-400">No reviews yet</div>
+        )}
+
         <div className="mt-3 flex justify-between items-end">
           <div>
             <div className="font-bold text-[17px] text-emerald-600">{formatPrice(listing.price)}</div>

@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
   const listings = await prisma.listing.findMany({
     where,
     orderBy,
-    include: { user: { select: { id: true, name: true, image: true } } },
+    include: {
+      user: { select: { id: true, name: true, image: true } },
+      reviews: { select: { quality: true, usability: true, value: true } },
+    },
     take: 50,
   });
 

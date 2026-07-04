@@ -29,6 +29,43 @@ export function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
+/** The star dimensions a customer rates a listing on. */
+export const REVIEW_DIMENSIONS = ["quality", "usability", "value"] as const;
+export type ReviewDimension = (typeof REVIEW_DIMENSIONS)[number];
+
+type ReviewScores = { quality: number; usability: number; value: number };
+
+export type ReviewSummary = {
+  count: number;
+  overall: number;
+  quality: number;
+  usability: number;
+  value: number;
+};
+
+/**
+ * Average a listing's per-dimension star scores into a summary used on the
+ * product card and detail page. `overall` is the mean of the three dimensions.
+ */
+export function summarizeReviews(reviews?: ReviewScores[] | null): ReviewSummary {
+  const count = reviews?.length ?? 0;
+  if (!reviews || count === 0) {
+    return { count: 0, overall: 0, quality: 0, usability: 0, value: 0 };
+  }
+  const totals = reviews.reduce(
+    (acc, r) => ({
+      quality: acc.quality + r.quality,
+      usability: acc.usability + r.usability,
+      value: acc.value + r.value,
+    }),
+    { quality: 0, usability: 0, value: 0 },
+  );
+  const quality = totals.quality / count;
+  const usability = totals.usability / count;
+  const value = totals.value / count;
+  return { count, overall: (quality + usability + value) / 3, quality, usability, value };
+}
+
 export function formatRelativeTime(date: Date | string) {
   const now = new Date();
   const diff = now.getTime() - new Date(date).getTime();

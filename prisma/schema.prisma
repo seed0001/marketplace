@@ -87,6 +87,9 @@ model Message {
 model Review {
   id        String   @id @default(cuid())
   rating    Int
+  quality   Int      @default(0)
+  usability Int      @default(0)
+  value     Int      @default(0)
   comment   String?
   listingId String
   authorId  String
