@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
 import { PaymentMethods } from "@/components/PaymentMethods";
+import { ConnectGithub } from "@/components/ConnectGithub";
 
 type Listing = {
   id: string;
@@ -54,6 +55,7 @@ export default function ProfilePage() {
       </div>
 
       <PaymentMethods />
+      <ConnectGithub />
 
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold">My listings</h2>

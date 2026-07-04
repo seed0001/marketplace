@@ -13,14 +13,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   const listing = await prisma.listing.findUnique({
     where: { id },
     include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          paymentMethods: { select: { type: true, handle: true } },
-        },
-      },
+      user: { select: { id: true, name: true, image: true } },
       reviews: {
         include: { author: { select: { id: true, name: true, image: true } } },
         orderBy: { createdAt: "desc" },
@@ -32,12 +25,13 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
 
   const isOwner = session?.user?.id === listing.userId;
 
-  const purchased =
-    !!session?.user?.id &&
-    !isOwner &&
-    !!(await prisma.purchase.findUnique({
-      where: { listingId_buyerId: { listingId: listing.id, buyerId: session.user.id } },
-    }).then((p) => p?.status === "paid"));
+  const order =
+    session?.user?.id && !isOwner
+      ? await prisma.order.findUnique({
+          where: { listingId_buyerId: { listingId: listing.id, buyerId: session.user.id } },
+          select: { status: true },
+        })
+      : null;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -81,12 +75,9 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
 
           <ListingActions
             listingId={listing.id}
-            sellerId={listing.userId}
             isOwner={isOwner}
-            price={listing.price}
             hasDownload={!!listing.githubUrl}
-            purchased={purchased}
-            paymentMethods={listing.user.paymentMethods}
+            orderStatus={order?.status ?? null}
           />
         </div>
       </div>

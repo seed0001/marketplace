@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { parseGithubRepo, githubZipUrl } from "@/lib/github";
+import { getInstallationToken } from "@/lib/githubApp";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Streams the listing's GitHub repo to the buyer as a .zip, proxied through our
- * own domain. The client never sees or is redirected to GitHub. Requires the
- * caller to own the listing or to have a paid Purchase for it.
+ * own domain. The client is never sent to or shown GitHub.
+ *
+ * Access requires the caller to own the listing, or to have an order the seller
+ * has "released" (i.e. paid and cleared). Private repos are read with a
+ * short-lived token minted from the seller's GitHub App installation.
  */
 export async function GET(
   _request: NextRequest,
@@ -29,11 +33,14 @@ export async function GET(
 
   const isOwner = listing.userId === session.user.id;
   if (!isOwner) {
-    const purchase = await prisma.purchase.findUnique({
+    const order = await prisma.order.findUnique({
       where: { listingId_buyerId: { listingId: id, buyerId: session.user.id } },
     });
-    if (purchase?.status !== "paid") {
-      return NextResponse.json({ error: "Purchase required" }, { status: 403 });
+    if (order?.status !== "released") {
+      return NextResponse.json(
+        { error: "The seller hasn't released this download yet." },
+        { status: 403 }
+      );
     }
   }
 
@@ -47,16 +54,24 @@ export async function GET(
     "User-Agent": "dev-marketplace",
     Accept: "application/vnd.github+json",
   };
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
+
+  // Prefer a token scoped to the seller's GitHub App installation (works for
+  // private and public repos). Fall back to a server token, then anonymous.
+  const installation = await prisma.githubInstallation.findUnique({
+    where: { userId: listing.userId },
+  });
+  const token =
+    (installation ? await getInstallationToken(installation.installationId) : null) ||
+    process.env.GITHUB_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   const upstream = await fetch(githubZipUrl(repo), { headers, redirect: "follow" });
   if (!upstream.ok || !upstream.body) {
-    return NextResponse.json(
-      { error: "Could not fetch the file from the source" },
-      { status: 502 }
-    );
+    const hint =
+      upstream.status === 404 && !token
+        ? "If this is a private repo, the seller needs to connect GitHub."
+        : "Could not fetch the file from the source.";
+    return NextResponse.json({ error: hint }, { status: 502 });
   }
 
   const responseHeaders = new Headers({

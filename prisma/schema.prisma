@@ -22,7 +22,9 @@ model User {
   conversationsAsSeller Conversation[] @relation("ConversationSeller")
   reviewsGiven Review[]        @relation("ReviewAuthor")
   paymentMethods PaymentMethod[]
-  purchases      Purchase[]
+  purchases      Order[]        @relation("OrderBuyer")
+  sales          Order[]        @relation("OrderSeller")
+  githubInstallation GithubInstallation?
 }
 
 model Listing {
@@ -42,7 +44,7 @@ model Listing {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations Conversation[]
   reviews      Review[]
-  purchases    Purchase[]
+  orders       Order[]
 
   @@index([userId])
   @@index([status])
@@ -107,16 +109,36 @@ model PaymentMethod {
   @@index([userId])
 }
 
-model Purchase {
+model Order {
   id        String   @id @default(cuid())
   listingId String
   buyerId   String
-  status    String   @default("pending") // "pending" | "paid"
+  sellerId  String
+  // "requested" -> buyer asked to buy; "released" -> seller cleared the download
+  // after receiving payment; "declined" -> seller rejected/cancelled.
+  status    String   @default("requested")
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  buyer   User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  buyer   User    @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller  User    @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
 
   @@unique([listingId, buyerId])
   @@index([buyerId])
+  @@index([sellerId])
+}
+
+// A seller's GitHub App installation. We store only the installation id (not a
+// secret); short-lived access tokens are minted on demand from the app's
+// private key, so private repos need no long-lived credential in our database.
+model GithubInstallation {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  installationId String
+  accountLogin   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

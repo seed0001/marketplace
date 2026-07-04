@@ -30,6 +30,9 @@ export function Navbar() {
               >
                 + Sell
               </Link>
+              <Link href="/orders" className="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors">
+                Orders
+              </Link>
               <Link href="/messages" className="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors">
                 Messages
               </Link>
@@ -95,6 +98,9 @@ export function Navbar() {
             <>
               <Link href="/listings/new" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
                 + Sell
+              </Link>
+              <Link href="/orders" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+                Orders
               </Link>
               <Link href="/messages" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
                 Messages
