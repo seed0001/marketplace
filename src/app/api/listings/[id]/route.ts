@@ -38,17 +38,23 @@ export async function PUT(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const data: Record<string, unknown> = {
+      title: body.title,
+      description: body.description,
+      price: body.price ? parseFloat(body.price) : undefined,
+      images: sanitizeImages(body.images),
+      category: body.category,
+      condition: body.condition,
+      status: body.status,
+    };
+
+    if (body.sections !== undefined) {
+      data.sections = body.sections;
+    }
+
     const updated = await prisma.listing.update({
       where: { id },
-      data: {
-        title: body.title,
-        description: body.description,
-        price: body.price ? parseFloat(body.price) : undefined,
-        images: sanitizeImages(body.images),
-        category: body.category,
-        condition: body.condition,
-        status: body.status,
-      },
+      data,
     });
 
     return NextResponse.json(updated);

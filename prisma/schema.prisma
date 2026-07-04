@@ -39,6 +39,7 @@ model Listing {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations Conversation[]
   reviews      Review[]
+  sections     Json?
 
   @@index([userId])
   @@index([status])

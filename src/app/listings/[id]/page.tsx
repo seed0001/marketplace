@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { ListingActions } from "./ListingActions";
 import { auth } from "@/lib/auth";
+import { SectionRenderer } from "@/components/listing-sections/SectionRenderer";
+import type { Section } from "@/lib/listing-sections";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,8 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   if (!listing) notFound();
 
   const isOwner = session?.user?.id === listing.userId;
+  const sections = listing.sections as Section[] | null;
+  const hasSections = sections && sections.length > 0;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -48,7 +52,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </span>
           )}
 
-          <p className="text-zinc-600">{listing.description}</p>
+          {!hasSections && <p className="text-zinc-600">{listing.description}</p>}
 
           <div className="flex items-center gap-3 text-sm text-zinc-500">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold">
@@ -62,6 +66,14 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
           <ListingActions listingId={listing.id} sellerId={listing.userId} isOwner={isOwner} />
         </div>
       </div>
+
+      {hasSections && (
+        <div className="mt-12">
+          {sections.map((section) => (
+            <SectionRenderer key={section.id} section={section} />
+          ))}
+        </div>
+      )}
 
       {listing.reviews.length > 0 && (
         <section className="mt-12">
