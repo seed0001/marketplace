@@ -35,7 +35,7 @@ export default function ProfilePage() {
   if (!session) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">
-        <p className="text-zinc-600">Sign in to view your profile.</p>
+        <p className="text-zinc-400">Sign in to view your profile.</p>
       </div>
     );
   }

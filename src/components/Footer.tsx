@@ -8,7 +8,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="max-w-xs">
-            <Link href="/" className="flex items-center gap-2 text-zinc-900">
+            <Link href="/" className="flex items-center gap-2 text-zinc-100">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-base font-bold text-white">
                 V
               </span>
@@ -21,17 +21,17 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Explore
             </h3>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <Link href="/listings" className="text-zinc-600 hover:text-emerald-600 transition-colors">
+                <Link href="/listings" className="text-zinc-400 hover:text-emerald-500 transition-colors">
                   Browse the market
                 </Link>
               </li>
               <li>
-                <Link href="/listings/new" className="text-zinc-600 hover:text-emerald-600 transition-colors">
+                <Link href="/listings/new" className="text-zinc-400 hover:text-emerald-500 transition-colors">
                   Start selling
                 </Link>
               </li>
@@ -39,22 +39,22 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Account
             </h3>
             <ul className="mt-3 space-y-2 text-sm">
               <li>
-                <Link href="/auth/signin" className="text-zinc-600 hover:text-emerald-600 transition-colors">
+                <Link href="/auth/signin" className="text-zinc-400 hover:text-emerald-500 transition-colors">
                   Sign in
                 </Link>
               </li>
               <li>
-                <Link href="/auth/signup" className="text-zinc-600 hover:text-emerald-600 transition-colors">
+                <Link href="/auth/signup" className="text-zinc-400 hover:text-emerald-500 transition-colors">
                   Create account
                 </Link>
               </li>
               <li>
-                <Link href="/messages" className="text-zinc-600 hover:text-emerald-600 transition-colors">
+                <Link href="/messages" className="text-zinc-400 hover:text-emerald-500 transition-colors">
                   Messages
                 </Link>
               </li>
@@ -62,7 +62,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
               About
             </h3>
             <p className="mt-3 text-sm text-muted">

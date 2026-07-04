@@ -11,7 +11,7 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 text-zinc-900">
+        <Link href="/" className="flex items-center gap-2 text-zinc-100">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-base font-bold text-white shadow-sm">
             V
           </span>
@@ -19,7 +19,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden sm:flex items-center gap-6">
-          <Link href="/listings" className="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors">
+          <Link href="/listings" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
             Browse
           </Link>
           {session ? (
@@ -30,7 +30,7 @@ export function Navbar() {
               >
                 + Sell
               </Link>
-              <Link href="/messages" className="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors">
+              <Link href="/messages" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
                 Messages
               </Link>
               <div className="relative">
@@ -38,7 +38,7 @@ export function Navbar() {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 text-sm font-medium"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-800 text-sm font-semibold text-emerald-200">
                     {session.user?.name?.[0]?.toUpperCase() || "U"}
                   </div>
                 </button>
@@ -46,14 +46,14 @@ export function Navbar() {
                   <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                      className="block px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
                       onClick={() => setMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={() => signOut()}
-                      className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-zinc-50"
+                      className="block w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-zinc-800"
                     >
                       Sign out
                     </button>
@@ -63,7 +63,7 @@ export function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/auth/signin" className="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors">
+              <Link href="/auth/signin" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
                 Sign in
               </Link>
               <Link
@@ -77,7 +77,7 @@ export function Navbar() {
         </div>
 
         <button
-          className="sm:hidden p-2 text-zinc-700"
+          className="sm:hidden p-2 text-zinc-400"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,30 +88,30 @@ export function Navbar() {
 
       {menuOpen && (
         <div className="border-t border-border sm:hidden px-4 py-3 space-y-2 bg-surface">
-          <Link href="/listings" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+          <Link href="/listings" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
             Browse
           </Link>
           {session ? (
             <>
-              <Link href="/listings/new" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+              <Link href="/listings/new" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 + Sell
               </Link>
-              <Link href="/messages" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+              <Link href="/messages" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Messages
               </Link>
-              <Link href="/profile" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+              <Link href="/profile" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Profile
               </Link>
-              <button onClick={() => signOut()} className="block py-1 text-sm text-red-600">
+              <button onClick={() => signOut()} className="block py-1 text-sm text-red-400">
                 Sign out
               </button>
             </>
           ) : (
             <>
-              <Link href="/auth/signin" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+              <Link href="/auth/signin" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Sign in
               </Link>
-              <Link href="/auth/signup" className="block py-1 text-sm text-zinc-700" onClick={() => setMenuOpen(false)}>
+              <Link href="/auth/signup" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Sign up
               </Link>
             </>

@@ -16,7 +16,7 @@ export default function NewListing() {
   if (!session) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">
-        <p className="text-zinc-600">You must be signed in to create a listing.</p>
+        <p className="text-zinc-400">You must be signed in to create a listing.</p>
       </div>
     );
   }
@@ -122,7 +122,7 @@ export default function NewListing() {
             type="checkbox"
             className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
           />
-          <span className="text-sm text-zinc-600">18+ age-restricted content</span>
+          <span className="text-sm text-zinc-400">18+ age-restricted content</span>
         </label>
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>

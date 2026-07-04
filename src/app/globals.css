@@ -3,17 +3,15 @@
 
 /*
  * VibeMarket design system
- * Committed light theme. The previous prefers-color-scheme:dark block flipped
- * text to light gray while backgrounds stayed white, which washed out the
- * navbar and other surfaces. We now ship a single, consistent light theme.
+ * Dark theme with light particles.
  */
 
 :root {
-  --background: #fafaf9;   /* warm off-white page background (zinc-50-ish) */
-  --surface: #ffffff;      /* cards, navbar, panels */
-  --foreground: #0c0a09;   /* near-black primary text */
-  --muted: #78716c;        /* secondary text */
-  --border: #e7e5e4;       /* hairline borders */
+  --background: #09090b;   /* zinc-950 page background */
+  --surface: #18181b;      /* zinc-900 cards, navbar, panels */
+  --foreground: #fafafa;   /* zinc-50 primary text */
+  --muted: #a1a1aa;        /* zinc-400 secondary text */
+  --border: #27272a;       /* zinc-800 hairline borders */
 }
 
 @theme inline {

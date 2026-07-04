@@ -116,7 +116,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
   if (!session) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">
-        <p className="text-zinc-600">Sign in to view messages.</p>
+        <p className="text-zinc-400">Sign in to view messages.</p>
       </div>
     );
   }
@@ -188,7 +188,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
         <div className="mt-8 rounded-xl border bg-white p-5">
           <h3 className="text-sm font-semibold mb-3">Leave feedback</h3>
           {myFeedback ? (
-            <div className="text-sm text-zinc-600">
+            <div className="text-sm text-zinc-400">
               <p>You rated {otherPerson?.name || "User"}: <span className="text-amber-500">{'★'.repeat(myFeedback.rating)}</span></p>
               {myFeedback.comment && <p className="mt-1 text-zinc-500">{myFeedback.comment}</p>}
               <p className="text-xs text-zinc-400 mt-2">Feedback can only be left once per listing.</p>

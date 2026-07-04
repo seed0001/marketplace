@@ -16,7 +16,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="group block overflow-hidden rounded-3xl border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl"
+      className="group block overflow-hidden rounded-3xl border bg-surface shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-xl"
     >
       <div className="aspect-[4/3] bg-zinc-100 overflow-hidden relative">
         {listing.images[0] ? (
@@ -33,7 +33,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
           </div>
         )}
         {listing.category && (
-          <div className="absolute top-3 right-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-zinc-700 shadow">
+          <div className="absolute top-3 right-3 rounded-full bg-surface/90 px-2.5 py-0.5 text-[11px] font-medium text-zinc-300 shadow">
             {listing.category}
           </div>
         )}
