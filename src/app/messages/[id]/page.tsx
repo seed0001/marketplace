@@ -13,15 +13,30 @@ type Message = {
   sender: { id: string; name?: string | null; image?: string | null };
 };
 
+type ConvInfo = {
+  id: string;
+  listing: { id: string; title: string; price: number };
+  buyer: { id: string; name?: string | null };
+  seller: { id: string; name?: string | null };
+};
+
 export default function ChatPage(props: { params: Promise<{ id: string }> }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conv, setConv] = useState<ConvInfo | null>(null);
   const [newMsg, setNewMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // feedback state
+  const [myFeedback, setMyFeedback] = useState<{ rating: number; comment: string } | null>(null);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState("");
 
   useEffect(() => {
     props.params.then((p) => setId(p.id));
@@ -29,14 +44,26 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/conversations/${id}/messages`)
+    Promise.all([
+      fetch(`/api/conversations/${id}/messages`).then((r) => r.json()),
+      fetch(`/api/conversations/${id}`).then((r) => r.json()),
+    ]).then(([msgs, convData]) => {
+      setMessages(msgs);
+      setConv(convData);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id || !session?.user?.id || !conv) return;
+    fetch(`/api/feedback?listingId=${conv.listing.id}&toUserId=${session.user.id}`)
       .then((r) => r.json())
       .then((data) => {
-        setMessages(data);
-        setLoading(false);
+        const mine = data.feedback?.find((f: any) => f.fromUserId === session.user!.id);
+        if (mine) setMyFeedback({ rating: mine.rating, comment: mine.comment || "" });
       })
-      .catch(() => setLoading(false));
-  }, [id]);
+      .catch(() => {});
+  }, [id, session, conv]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,6 +85,34 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
     setSending(false);
   }
 
+  async function handleFeedbackSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!feedbackRating || !conv) return;
+    setSubmittingFeedback(true);
+    setFeedbackError("");
+
+    const res = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        listingId: conv.listing.id,
+        toUserId: session?.user?.id === conv.seller.id ? conv.buyer.id : conv.seller.id,
+        rating: feedbackRating,
+        comment: feedbackComment,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setFeedbackError(data.error || "Failed to submit");
+      setSubmittingFeedback(false);
+      return;
+    }
+
+    setMyFeedback({ rating: feedbackRating, comment: feedbackComment });
+    setSubmittingFeedback(false);
+  }
+
   if (!session) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">
@@ -68,6 +123,10 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
 
   if (loading) return <div className="text-center py-16 text-zinc-500">Loading...</div>;
 
+  const otherPerson = conv
+    ? session.user!.id === conv.seller.id ? conv.buyer : conv.seller
+    : null;
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <button
@@ -77,8 +136,15 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
         &larr; Back to messages
       </button>
 
+      {conv && (
+        <p className="text-sm text-zinc-500 mb-4">
+          Conversation with <span className="font-medium text-zinc-700">{otherPerson?.name || "User"}</span> about{" "}
+          <span className="font-medium text-zinc-700">{conv.listing.title}</span>
+        </p>
+      )}
+
       <div className="rounded-xl border bg-white">
-        <div className="h-[60vh] overflow-y-auto p-4 space-y-3">
+        <div className="h-[50vh] overflow-y-auto p-4 space-y-3">
           {messages.map((msg) => {
             const isMe = msg.senderId === session.user!.id;
             return (
@@ -116,6 +182,50 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
           </button>
         </div>
       </div>
+
+      {/* Feedback */}
+      {conv && (
+        <div className="mt-8 rounded-xl border bg-white p-5">
+          <h3 className="text-sm font-semibold mb-3">Leave feedback</h3>
+          {myFeedback ? (
+            <div className="text-sm text-zinc-600">
+              <p>You rated {otherPerson?.name || "User"}: <span className="text-amber-500">{'★'.repeat(myFeedback.rating)}</span></p>
+              {myFeedback.comment && <p className="mt-1 text-zinc-500">{myFeedback.comment}</p>}
+              <p className="text-xs text-zinc-400 mt-2">Feedback can only be left once per listing.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleFeedbackSubmit} className="space-y-3">
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setFeedbackRating(star)}
+                    className={`text-xl ${star <= feedbackRating ? "text-amber-500" : "text-zinc-200"} hover:text-amber-400 transition`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                rows={2}
+                placeholder="Comment (optional)"
+                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y"
+              />
+              {feedbackError && <p className="text-xs text-red-600">{feedbackError}</p>}
+              <button
+                type="submit"
+                disabled={!feedbackRating || submittingFeedback}
+                className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {submittingFeedback ? "Submitting..." : "Submit feedback"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 }

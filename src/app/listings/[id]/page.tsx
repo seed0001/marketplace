@@ -31,6 +31,12 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   const manualSections = listing.sections as Section[] | null;
   const hasContent = readmeSections.length > 0 || (manualSections && manualSections.length > 0);
 
+  const sellerFeedback = await prisma.feedback.aggregate({
+    where: { toUserId: listing.userId },
+    _avg: { rating: true },
+    _count: true,
+  });
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* Hero */}
@@ -75,7 +81,16 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </div>
             <div>
               <p className="font-medium text-zinc-700">{listing.user.name || "Anonymous"}</p>
-              <p className="text-xs">{formatDate(listing.createdAt)}</p>
+              <div className="flex items-center gap-1.5 text-xs">
+                <span>{formatDate(listing.createdAt)}</span>
+                {sellerFeedback._count > 0 && (
+                  <>
+                    <span>·</span>
+                    <span className="text-amber-500">{'★'.repeat(Math.round(sellerFeedback._avg.rating ?? 0))}</span>
+                    <span className="text-zinc-400">({sellerFeedback._count})</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

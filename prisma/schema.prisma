@@ -21,6 +21,8 @@ model User {
   conversationsAsBuyer  Conversation[] @relation("ConversationBuyer")
   conversationsAsSeller Conversation[] @relation("ConversationSeller")
   reviewsGiven Review[]        @relation("ReviewAuthor")
+  feedbackGiven   Feedback[]    @relation("FeedbackFrom")
+  feedbackReceived Feedback[]   @relation("FeedbackTo")
 }
 
 model Listing {
@@ -40,6 +42,7 @@ model Listing {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations Conversation[]
   reviews      Review[]
+  feedback     Feedback[]
   sections     Json?
   readme       String?
 
@@ -93,4 +96,22 @@ model Review {
   author  User    @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   @@unique([listingId, authorId])
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String?
+  listingId  String
+  fromUserId String
+  toUserId   String
+  createdAt  DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  from    User    @relation("FeedbackFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to      User    @relation("FeedbackTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, fromUserId])
+  @@index([toUserId])
+  @@index([fromUserId])
 }
