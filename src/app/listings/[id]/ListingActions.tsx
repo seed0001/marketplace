@@ -37,32 +37,22 @@ export function ListingActions({
   }
 
   return (
-    <div className="flex flex-col gap-2 pt-2">
-      <div className="flex gap-3">
-        {!isOwner && (
-          <button
-            onClick={handleMessage}
-            disabled={messaging}
-            className="flex-1 rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-          >
-            {messaging ? "Starting chat..." : "Message seller"}
-          </button>
-        )}
-        {isOwner && (
-          <Link
-            href={`/listings/${listingId}/edit`}
-            className="flex-1 rounded-lg border py-2 text-sm font-medium text-center hover:bg-zinc-50"
-          >
-            Edit listing
-          </Link>
-        )}
-      </div>
+    <div className="flex gap-3 pt-2">
+      {!isOwner && (
+        <button
+          onClick={handleMessage}
+          disabled={messaging}
+          className="flex-1 rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {messaging ? "Starting chat..." : "Message seller"}
+        </button>
+      )}
       {isOwner && (
         <Link
-          href={`/listings/${listingId}/build`}
-          className="block rounded-lg border border-emerald-200 bg-emerald-50 py-2 text-sm font-medium text-emerald-700 text-center hover:bg-emerald-100"
+          href={`/listings/${listingId}/edit`}
+          className="flex-1 rounded-lg border py-2 text-sm font-medium text-center hover:bg-zinc-50"
         >
-          Build page
+          Edit listing
         </Link>
       )}
     </div>

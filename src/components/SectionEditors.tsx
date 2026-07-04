@@ -1,88 +1,31 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
-import type { Section, SectionType, SpecItem, FaqItem, ChangelogEntry } from "@/lib/listing-sections";
-import { sectionLabel } from "@/lib/listing-sections";
+import type { Section, SpecItem, FaqItem, ChangelogEntry } from "@/lib/listing-sections";
 
 type Props = {
-  section: Section;
-  onUpdate: (patch: Partial<Section>) => void;
-  onRemove: () => void;
+  sections: Section[];
+  onChange: (sections: Section[]) => void;
 };
 
-export function SortableSection({ section, onUpdate, onRemove }: Props) {
-  const [expanded, setExpanded] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: section.id,
-  });
+export function SectionEditors({ sections, onChange }: Props) {
+  function updateSection(index: number, patch: Partial<Section>) {
+    const next = [...sections];
+    next[index] = { ...next[index], ...patch };
+    onChange(next);
+  }
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+  if (sections.length === 0) return null;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="rounded-xl border bg-white shadow-sm overflow-hidden"
-    >
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-zinc-50">
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600"
-          aria-label="Drag to reorder"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-            <circle cx="5" cy="3" r="1.5" />
-            <circle cx="11" cy="3" r="1.5" />
-            <circle cx="5" cy="8" r="1.5" />
-            <circle cx="11" cy="8" r="1.5" />
-            <circle cx="5" cy="13" r="1.5" />
-            <circle cx="11" cy="13" r="1.5" />
-          </svg>
-        </button>
-
-        <span className="rounded bg-zinc-200 px-2 py-0.5 text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
-          {sectionLabel(section.type as SectionType)}
-        </span>
-
-        <input
-          value={section.title}
-          onChange={(e) => onUpdate({ title: e.target.value })}
-          placeholder="Section title"
-          className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-zinc-300"
-        />
-
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-xs text-zinc-500 hover:text-zinc-700"
-        >
-          {expanded ? "Collapse" : "Edit"}
-        </button>
-
-        <button
-          onClick={onRemove}
-          className="text-zinc-400 hover:text-red-500 transition"
-          aria-label="Remove section"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="1" y1="1" x2="13" y2="13" />
-            <line x1="13" y1="1" x2="1" y2="13" />
-          </svg>
-        </button>
-      </div>
-
-      {expanded && (
-        <div className="p-4">
-          <SectionEditor section={section} onUpdate={onUpdate} />
-        </div>
-      )}
+    <div className="space-y-8">
+      <h2 className="text-lg font-semibold border-b pb-2">Page sections</h2>
+      {sections.map((section, i) => (
+        <fieldset key={section.id}>
+          <label className="block text-sm font-medium mb-2">{section.title}</label>
+          <SectionEditor section={section} onUpdate={(patch) => updateSection(i, patch)} />
+        </fieldset>
+      ))}
     </div>
   );
 }
@@ -107,8 +50,6 @@ function SectionEditor({
       return <FaqEditor content={section.content as FaqItem[]} onUpdate={onUpdate} />;
     case "changelog":
       return <ChangelogEditor content={section.content as ChangelogEntry[]} onUpdate={onUpdate} />;
-    default:
-      return null;
   }
 }
 
@@ -123,7 +64,7 @@ function RichTextEditor({
     <textarea
       value={content}
       onChange={(e) => onUpdate({ content: e.target.value })}
-      rows={8}
+      rows={6}
       placeholder="Write in markdown..."
       className="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-emerald-500 resize-y font-mono"
     />
@@ -164,14 +105,10 @@ function SpecsEditor({
             placeholder="Value"
             className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
-          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">
-            &times;
-          </button>
+          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">
-        + Add row
-      </button>
+      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add row</button>
     </div>
   );
 }
@@ -204,14 +141,10 @@ function FeaturesEditor({
             placeholder="Feature"
             className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
-          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">
-            &times;
-          </button>
+          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">
-        + Add feature
-      </button>
+      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add feature</button>
     </div>
   );
 }
@@ -223,11 +156,7 @@ function GalleryEditor({
   content: string[];
   onUpdate: (patch: Partial<Section>) => void;
 }) {
-  return (
-    <div>
-      <ImageUpload value={content} onChange={(val) => onUpdate({ content: val })} />
-    </div>
-  );
+  return <ImageUpload value={content} onChange={(val) => onUpdate({ content: val })} />;
 }
 
 function FaqEditor({
@@ -259,9 +188,7 @@ function FaqEditor({
               placeholder="Question"
               className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
             />
-            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">
-              &times;
-            </button>
+            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
           </div>
           <textarea
             value={item.answer}
@@ -272,9 +199,7 @@ function FaqEditor({
           />
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">
-        + Add Q&A
-      </button>
+      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add Q&A</button>
     </div>
   );
 }
@@ -314,9 +239,7 @@ function ChangelogEditor({
               placeholder="2024-01-01"
               className="w-1/3 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
             />
-            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">
-              &times;
-            </button>
+            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
           </div>
           <textarea
             value={item.notes}
@@ -327,9 +250,7 @@ function ChangelogEditor({
           />
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">
-        + Add entry
-      </button>
+      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add entry</button>
     </div>
   );
 }

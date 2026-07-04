@@ -4,6 +4,11 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { SectionEditors } from "@/components/SectionEditors";
+import { createDefaultSection } from "@/lib/listing-sections";
+import type { Section, SectionType } from "@/lib/listing-sections";
+
+const allTypes: SectionType[] = ["richtext", "specs", "features", "gallery", "faq", "changelog"];
 
 export default function EditListingPage(props: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -13,6 +18,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   const [error, setError] = useState("");
   const [id, setId] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -36,6 +42,11 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           category: data.category || "",
         });
         setImages(Array.isArray(data.images) ? data.images : []);
+        if (Array.isArray(data.sections) && data.sections.length > 0) {
+          setSections(data.sections);
+        } else {
+          setSections(allTypes.map((t, i) => createDefaultSection(t, i)));
+        }
         setFetching(false);
       })
       .catch(() => setFetching(false));
@@ -57,7 +68,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     const res = await fetch(`/api/listings/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, price: parseFloat(form.price), images }),
+      body: JSON.stringify({ ...form, price: parseFloat(form.price), images, sections }),
     });
 
     if (!res.ok) {
@@ -73,7 +84,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   if (fetching) return <div className="text-center py-16 text-zinc-500">Loading...</div>;
 
   return (
-    <div className="mx-auto max-w-lg mt-8 px-4">
+    <div className="mx-auto max-w-2xl mt-8 px-4">
       <h1 className="text-2xl font-bold mb-6">Edit listing</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -126,6 +137,11 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           <label className="block text-sm font-medium mb-1">Photos</label>
           <ImageUpload value={images} onChange={setImages} />
         </div>
+
+        <hr className="my-6" />
+
+        <SectionEditors sections={sections} onChange={setSections} />
+
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
