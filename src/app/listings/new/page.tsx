@@ -60,7 +60,7 @@ export default function NewListing() {
           <input
             name="title"
             required
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -69,7 +69,7 @@ export default function NewListing() {
             name="description"
             required
             rows={4}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -80,7 +80,7 @@ export default function NewListing() {
             step="0.01"
             min="0"
             required
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -88,14 +88,14 @@ export default function NewListing() {
           <input
             name="category"
             placeholder="e.g. Electronics, Clothing, Furniture"
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Condition</label>
           <select
             name="condition"
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
             <option value="new">New</option>
@@ -111,14 +111,14 @@ export default function NewListing() {
             name="images"
             rows={3}
             placeholder="https://example.com/image1.jpg"
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create listing"}
         </button>

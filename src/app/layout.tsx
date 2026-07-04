@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marketplace",
-  description: "Buy, sell, trade dev tools, domains, side projects & more",
+  title: {
+    default: "Marketplace — The marketplace for developers",
+    template: "%s · Marketplace",
+  },
+  description:
+    "Buy, sell, and trade dev tools, domains, side projects, and more. A community-run marketplace built by developers, for developers.",
+  keywords: [
+    "developer marketplace",
+    "buy dev tools",
+    "sell side projects",
+    "domains",
+    "SaaS",
+  ],
+  openGraph: {
+    title: "Marketplace — The marketplace for developers",
+    description:
+      "Buy, sell, and trade dev tools, domains, side projects, and more.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -33,6 +51,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

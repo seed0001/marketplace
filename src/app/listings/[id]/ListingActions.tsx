@@ -42,7 +42,7 @@ export function ListingActions({
         <button
           onClick={handleMessage}
           disabled={messaging}
-          className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="flex-1 rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {messaging ? "Starting chat..." : "Message seller"}
         </button>
