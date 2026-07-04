@@ -45,7 +45,7 @@ export default async function ListingsPage(props: {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold mb-6">Browse builds</h1>
+      <h1 className="text-2xl font-bold mb-6">Browse the market</h1>
 
       <div className="mb-6 space-y-4">
         <SearchBar />
@@ -65,7 +65,7 @@ export default async function ListingsPage(props: {
       </div>
 
       {listings.length === 0 ? (
-        <p className="text-zinc-500 text-center py-12">No builds found</p>
+        <p className="text-zinc-500 text-center py-12">No listings found</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {listings.map((listing) => (

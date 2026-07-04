@@ -15,7 +15,8 @@ export function Footer() {
               <span className="text-lg font-bold tracking-tight">VibeMarket</span>
             </Link>
             <p className="mt-3 text-sm text-muted">
-              Showcase and sell what you build with AI — apps, agents, automations, and more.
+              Sell your work and your services — from weekend projects to
+              enterprise systems — and turn every sale into a portfolio.
             </p>
           </div>
 
@@ -26,12 +27,12 @@ export function Footer() {
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link href="/listings" className="text-zinc-600 hover:text-emerald-600 transition-colors">
-                  Browse builds
+                  Browse the market
                 </Link>
               </li>
               <li>
                 <Link href="/listings/new" className="text-zinc-600 hover:text-emerald-600 transition-colors">
-                  Sell your build
+                  Start selling
                 </Link>
               </li>
             </ul>
@@ -65,15 +66,15 @@ export function Footer() {
               About
             </h3>
             <p className="mt-3 text-sm text-muted">
-              A marketplace for AI builders. Showcase your latest project,
-              connect with buyers, and ship on your terms.
+              A marketplace for makers and architects alike. List your work,
+              sell your time, and grow a track record that speaks for itself.
             </p>
           </div>
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted sm:flex-row">
           <p>&copy; {year} VibeMarket. All rights reserved.</p>
-          <p>Built for AI builders.</p>
+          <p>Built for makers and architects.</p>
         </div>
       </div>
     </footer>
