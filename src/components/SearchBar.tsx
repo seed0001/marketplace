@@ -21,7 +21,7 @@ export function SearchBar() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search listings..."
+        placeholder="Search builds..."
         className="flex-1 rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
       />
       <button

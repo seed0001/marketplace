@@ -17,22 +17,22 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Marketplace — The marketplace for developers",
-    template: "%s · Marketplace",
+    default: "VibeMarket — Sell what you build with AI",
+    template: "%s · VibeMarket",
   },
   description:
-    "Buy, sell, and trade dev tools, domains, side projects, and more. A community-run marketplace built by developers, for developers.",
+    "Showcase and sell what you build with AI — apps, agents, automations, and more. A marketplace for the people who build with AI.",
   keywords: [
-    "developer marketplace",
-    "buy dev tools",
-    "sell side projects",
-    "domains",
-    "SaaS",
+    "vibe coding",
+    "AI builders",
+    "sell AI apps",
+    "AI agents",
+    "automations",
   ],
   openGraph: {
-    title: "Marketplace — The marketplace for developers",
+    title: "VibeMarket — Sell what you build with AI",
     description:
-      "Buy, sell, and trade dev tools, domains, side projects, and more.",
+      "Showcase and sell what you build with AI — apps, agents, automations, and more.",
     type: "website",
   },
 };

@@ -18,7 +18,6 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     description: "",
     price: "",
     category: "",
-    condition: "",
   });
 
   useEffect(() => {
@@ -35,7 +34,6 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           description: data.description,
           price: data.price.toString(),
           category: data.category || "",
-          condition: data.condition || "",
         });
         setImages(Array.isArray(data.images) ? data.images : []);
         setFetching(false);
@@ -109,26 +107,19 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <input
+          <label className="block text-sm font-medium mb-1">Type</label>
+          <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Condition</label>
-          <select
-            value={form.condition}
-            onChange={(e) => setForm({ ...form, condition: e.target.value })}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
-            <option value="new">New</option>
-            <option value="like-new">Like New</option>
-            <option value="good">Good</option>
-            <option value="fair">Fair</option>
-            <option value="poor">Poor</option>
+            <option value="Web app">Web app</option>
+            <option value="Mobile app">Mobile app</option>
+            <option value="AI agent">AI agent</option>
+            <option value="Automation">Automation</option>
+            <option value="Prompt/template">Prompt/template</option>
+            <option value="Component">Component</option>
           </select>
         </div>
         <div>

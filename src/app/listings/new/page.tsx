@@ -36,7 +36,6 @@ export default function NewListing() {
         price: form.get("price"),
         images,
         category: form.get("category"),
-        condition: form.get("condition"),
       }),
     });
 
@@ -53,7 +52,7 @@ export default function NewListing() {
 
   return (
     <div className="mx-auto max-w-lg mt-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Create listing</h1>
+      <h1 className="text-2xl font-bold mb-6">List your build</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Title *</label>
@@ -84,25 +83,18 @@ export default function NewListing() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <input
-            name="category"
-            placeholder="e.g. Electronics, Clothing, Furniture"
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Condition</label>
+          <label className="block text-sm font-medium mb-1">Type</label>
           <select
-            name="condition"
+            name="category"
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
-            <option value="new">New</option>
-            <option value="like-new">Like New</option>
-            <option value="good">Good</option>
-            <option value="fair">Fair</option>
-            <option value="poor">Poor</option>
+            <option value="Web app">Web app</option>
+            <option value="Mobile app">Mobile app</option>
+            <option value="AI agent">AI agent</option>
+            <option value="Automation">Automation</option>
+            <option value="Prompt/template">Prompt/template</option>
+            <option value="Component">Component</option>
           </select>
         </div>
         <div>

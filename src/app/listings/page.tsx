@@ -45,7 +45,7 @@ export default async function ListingsPage(props: {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold mb-6">Browse listings</h1>
+      <h1 className="text-2xl font-bold mb-6">Browse builds</h1>
 
       <div className="mb-6 space-y-4">
         <SearchBar />
@@ -53,7 +53,7 @@ export default async function ListingsPage(props: {
           {categories.map((c) => c.category).filter(Boolean).map((cat) => (
             <a
               key={cat}
-              href={`/listings?category=${cat}`}
+              href={`/listings?category=${encodeURIComponent(cat as string)}`}
               className={`rounded-full border px-3 py-1 text-xs font-medium ${
                 searchParams.category === cat ? "bg-emerald-600 text-white border-emerald-600" : "hover:bg-zinc-100"
               }`}
@@ -65,7 +65,7 @@ export default async function ListingsPage(props: {
       </div>
 
       {listings.length === 0 ? (
-        <p className="text-zinc-500 text-center py-12">No listings found</p>
+        <p className="text-zinc-500 text-center py-12">No builds found</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {listings.map((listing) => (

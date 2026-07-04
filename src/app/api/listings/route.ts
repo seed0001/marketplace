@@ -10,8 +10,13 @@ export async function GET(request: NextRequest) {
   const minPrice = searchParams.get("minPrice");
   const maxPrice = searchParams.get("maxPrice");
   const sort = searchParams.get("sort") || "newest";
+  const userId = searchParams.get("userId");
 
-  const where: Record<string, unknown> = { status: "active" };
+  // A userId filter powers the profile "My listings" view, which should show
+  // the owner's listings in any status; public browsing stays active-only.
+  const where: Record<string, unknown> = userId
+    ? { userId }
+    : { status: "active" };
 
   if (query) {
     where.OR = [

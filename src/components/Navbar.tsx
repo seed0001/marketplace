@@ -13,9 +13,9 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2 text-zinc-900">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-base font-bold text-white shadow-sm">
-            M
+            V
           </span>
-          <span className="text-xl font-bold tracking-tight">Marketplace</span>
+          <span className="text-xl font-bold tracking-tight">VibeMarket</span>
         </Link>
 
         <div className="hidden sm:flex items-center gap-6">
