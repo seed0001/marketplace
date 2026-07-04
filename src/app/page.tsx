@@ -15,26 +15,28 @@ export default async function Home() {
   return (
     <div>
       {/* Hero */}
-      <div className="bg-gradient-to-br from-zinc-900 via-zinc-900 to-black text-white">
-        <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-          <div className="inline-block mb-3 rounded-full bg-white/10 px-4 py-0.5 text-sm tracking-widest">
+      <div className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-black text-white">
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative mx-auto max-w-5xl px-6 py-20 text-center">
+          <div className="inline-block mb-3 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-1 text-sm font-medium tracking-widest text-emerald-300">
             FOR DEVELOPERS
           </div>
           <h1 className="text-6xl font-semibold tracking-tighter">Marketplace</h1>
           <p className="mt-4 max-w-md mx-auto text-lg text-zinc-400">
-            Buy, sell, and trade dev tools, domains, side projects, and more.
+            Buy, sell, and trade dev tools, domains, side projects, and more —
+            built for the people who build.
           </p>
 
           <div className="mt-8 flex justify-center gap-4">
             <Link
               href="/listings"
-              className="rounded-full bg-white px-8 py-3 text-sm font-medium text-black transition hover:bg-zinc-200"
+              className="rounded-full bg-emerald-600 px-8 py-3 text-sm font-medium text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-500"
             >
               Browse listings
             </Link>
             <Link
               href="/listings/new"
-              className="rounded-full border border-white/30 px-8 py-3 text-sm font-medium hover:bg-white/10"
+              className="rounded-full border border-white/20 px-8 py-3 text-sm font-medium transition hover:bg-white/10"
             >
               List something
             </Link>
@@ -46,7 +48,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <div className="text-sm text-blue-600 font-medium tracking-wide">RECENT</div>
+            <div className="text-sm text-emerald-600 font-medium tracking-wide">RECENT</div>
             <h2 className="text-3xl font-semibold tracking-tight">Fresh listings</h2>
           </div>
           <Link href="/listings" className="text-sm font-medium hover:underline">

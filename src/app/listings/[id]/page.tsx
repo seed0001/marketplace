@@ -39,7 +39,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
         <div className="space-y-4">
           <div>
             <h1 className="text-2xl font-bold">{listing.title}</h1>
-            <p className="text-3xl font-bold text-blue-600 mt-1">{formatPrice(listing.price)}</p>
+            <p className="text-3xl font-bold text-emerald-600 mt-1">{formatPrice(listing.price)}</p>
           </div>
 
           {listing.category && (

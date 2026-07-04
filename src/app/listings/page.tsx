@@ -55,7 +55,7 @@ export default async function ListingsPage(props: {
               key={cat}
               href={`/listings?category=${cat}`}
               className={`rounded-full border px-3 py-1 text-xs font-medium ${
-                searchParams.category === cat ? "bg-blue-600 text-white border-blue-600" : "hover:bg-zinc-100"
+                searchParams.category === cat ? "bg-emerald-600 text-white border-emerald-600" : "hover:bg-zinc-100"
               }`}
             >
               {cat}

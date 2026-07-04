@@ -56,7 +56,7 @@ export default function ProfilePage() {
         <h2 className="text-lg font-semibold">My listings</h2>
         <Link
           href="/listings/new"
-          className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+          className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
         >
           + New listing
         </Link>

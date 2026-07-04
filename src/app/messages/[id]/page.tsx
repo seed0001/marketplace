@@ -72,7 +72,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <button
         onClick={() => router.push("/messages")}
-        className="text-sm text-blue-600 hover:underline mb-4"
+        className="text-sm text-emerald-600 hover:underline mb-4"
       >
         &larr; Back to messages
       </button>
@@ -85,11 +85,11 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                    isMe ? "bg-blue-600 text-white" : "bg-zinc-100"
+                    isMe ? "bg-emerald-600 text-white" : "bg-zinc-100"
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
-                  <p className={`text-xs mt-1 ${isMe ? "text-blue-200" : "text-zinc-400"}`}>
+                  <p className={`text-xs mt-1 ${isMe ? "text-emerald-200" : "text-zinc-400"}`}>
                     {formatRelativeTime(msg.createdAt)}
                   </p>
                 </div>
@@ -105,12 +105,12 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
             onChange={(e) => setNewMsg(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
             placeholder="Type a message..."
-            className="flex-1 rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="flex-1 rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
           <button
             onClick={sendMessage}
             disabled={sending || !newMsg.trim()}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
             Send
           </button>

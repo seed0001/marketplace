@@ -41,14 +41,14 @@ export default function SignUp() {
         <input
           name="name"
           placeholder="Name (optional)"
-          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
         />
         <input
           name="email"
           type="email"
           placeholder="Email"
           required
-          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
         />
         <input
           name="password"
@@ -56,13 +56,13 @@ export default function SignUp() {
           placeholder="Password"
           required
           minLength={6}
-          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+          className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>

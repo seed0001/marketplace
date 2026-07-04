@@ -88,7 +88,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             required
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -98,7 +98,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             required
             rows={4}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -109,7 +109,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             type="number"
             step="0.01"
             required
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -117,7 +117,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           <input
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         <div>
@@ -125,7 +125,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           <select
             value={form.condition}
             onChange={(e) => setForm({ ...form, condition: e.target.value })}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
             <option value="new">New</option>
@@ -141,14 +141,14 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             value={form.images}
             onChange={(e) => setForm({ ...form, images: e.target.value })}
             rows={3}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save changes"}
         </button>
