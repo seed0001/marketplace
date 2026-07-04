@@ -7,6 +7,7 @@ type Listing = {
   price: number;
   images: string[];
   category?: string | null;
+  adult?: boolean | null;
   createdAt: Date | string;
   user: { id: string; name?: string | null; image?: string | null };
 };
@@ -34,6 +35,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
         {listing.category && (
           <div className="absolute top-3 right-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-zinc-700 shadow">
             {listing.category}
+          </div>
+        )}
+        {listing.adult && (
+          <div className="absolute top-3 left-3 rounded-full bg-red-600/90 px-2 py-0.5 text-[11px] font-bold text-white shadow">
+            18+
           </div>
         )}
       </div>

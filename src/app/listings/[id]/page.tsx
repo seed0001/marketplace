@@ -59,6 +59,12 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </span>
           )}
 
+          {listing.adult && (
+            <span className="inline-block w-fit rounded-full bg-red-50 text-red-700 border border-red-200 px-3 py-1 text-xs font-bold">
+              18+
+            </span>
+          )}
+
           {!hasContent && (
             <p className="text-zinc-600 leading-relaxed">{listing.description}</p>
           )}

@@ -37,6 +37,7 @@ export default function NewListing() {
         images,
         category: form.get("category"),
         readme,
+        adult: form.get("adult") === "on",
       }),
     });
 
@@ -115,6 +116,14 @@ export default function NewListing() {
             <option value="Component">Component</option>
           </select>
         </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            name="adult"
+            type="checkbox"
+            className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <span className="text-sm text-zinc-600">18+ age-restricted content</span>
+        </label>
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>
           <ImageUpload value={images} onChange={setImages} />

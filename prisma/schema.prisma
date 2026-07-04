@@ -32,6 +32,7 @@ model Listing {
   category    String?
   condition   String?
   status      String   @default("active")
+  adult       Boolean  @default(false)
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

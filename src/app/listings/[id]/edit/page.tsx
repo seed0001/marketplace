@@ -18,6 +18,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     title: "",
     price: "",
     category: "",
+    adult: false,
   });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           title: data.title,
           price: data.price.toString(),
           category: data.category || "",
+          adult: data.adult ?? false,
         });
         setImages(Array.isArray(data.images) ? data.images : []);
         setReadme(data.readme ?? "");
@@ -63,6 +65,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
         category: form.category,
         images,
         readme,
+        adult: form.adult,
       }),
     });
 
@@ -127,6 +130,16 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.adult}
+            onChange={(e) => setForm({ ...form, adult: e.target.checked })}
+            className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <span className="text-sm text-zinc-600">18+ age-restricted content</span>
+        </label>
 
         <div>
           <label className="block text-sm font-medium mb-1">Type</label>
