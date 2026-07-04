@@ -54,7 +54,7 @@ export default function NewListing() {
 
   return (
     <div className="mx-auto max-w-lg mt-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">List your build</h1>
+      <h1 className="text-2xl font-bold mb-6">Create a listing</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Title *</label>

@@ -1,11 +1,18 @@
-# Marketplace
+# VibeMarket
 
-**The marketplace for developers.** Buy, sell, and trade dev tools, domains,
-side projects, and more — built by developers, for developers.
+**Sell your work, your services, your reputation.** From weekend projects to
+enterprise systems, VibeMarket is where anyone can sell what they make — and
+the time it takes to make it.
 
-Marketplace is a full-stack web app where developers can list what they've
-built (or no longer need), browse other people's listings, and message each
-other directly to close a deal.
+The audience spans the full spectrum: a hobbyist who builds for fun and wants
+to sell their stuff, a freelancer packaging up a service, all the way to an
+enterprise-level architect selling their time and expertise. Whatever you list,
+every sale feeds a living **portfolio** — who you are, what you've built, and
+your track record with customers.
+
+VibeMarket is a full-stack web app where sellers list products and services,
+buyers browse and search, and both sides message each other directly to close
+a deal.
 
 ## Features
 
@@ -100,7 +107,7 @@ prisma/                # Prisma schema
 ## Design & branding
 
 The visual system lives in `src/app/globals.css` as CSS variables consumed by
-Tailwind. Marketplace ships a single, consistent **light theme**:
+Tailwind. VibeMarket ships a single, consistent **light theme**:
 
 - **Accent:** emerald (`emerald-600`) for primary actions, links, and prices.
 - **Surfaces:** white cards on a warm off-white page background.
