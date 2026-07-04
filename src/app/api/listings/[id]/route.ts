@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
+import { sanitizeImages } from "@/lib/utils";
 
 export async function GET(
   _request: NextRequest,
@@ -43,7 +44,7 @@ export async function PUT(
         title: body.title,
         description: body.description,
         price: body.price ? parseFloat(body.price) : undefined,
-        images: body.images,
+        images: sanitizeImages(body.images),
         category: body.category,
         condition: body.condition,
         status: body.status,

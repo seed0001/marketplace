@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function EditListingPage(props: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -11,11 +12,11 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [id, setId] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
     price: "",
-    images: "",
     category: "",
     condition: "",
   });
@@ -33,10 +34,10 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           title: data.title,
           description: data.description,
           price: data.price.toString(),
-          images: data.images.join("\n"),
           category: data.category || "",
           condition: data.condition || "",
         });
+        setImages(Array.isArray(data.images) ? data.images : []);
         setFetching(false);
       })
       .catch(() => setFetching(false));
@@ -54,11 +55,6 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    const images = form.images
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
 
     const res = await fetch(`/api/listings/${id}`, {
       method: "PUT",
@@ -136,13 +132,8 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Image URLs (one per line)</label>
-          <textarea
-            value={form.images}
-            onChange={(e) => setForm({ ...form, images: e.target.value })}
-            rows={3}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
-          />
+          <label className="block text-sm font-medium mb-1">Photos</label>
+          <ImageUpload value={images} onChange={setImages} />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
