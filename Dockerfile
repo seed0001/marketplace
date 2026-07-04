@@ -1,21 +1,23 @@
 FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
-COPY . .
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN npm ci --ignore-scripts
 RUN npx prisma generate
+COPY . .
 RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=base /app/next.config.ts ./
-COPY --from=base /app/package*.json ./
 COPY --from=base /app/.next ./.next
 COPY --from=base /app/public ./public
 COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/package*.json ./
 COPY --from=base /app/src/generated ./src/generated
 COPY --from=base /app/prisma ./prisma
+COPY --from=base /app/prisma.config.ts ./
 
 EXPOSE 3000
 CMD npx prisma db push && npx next start
