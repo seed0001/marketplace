@@ -1,31 +1,36 @@
 "use client";
 
 import { ImageUpload } from "@/components/ImageUpload";
-import type { Section, SpecItem, FaqItem, ChangelogEntry } from "@/lib/listing-sections";
+import type { Section, SectionType, SpecItem, FaqItem, ChangelogEntry } from "@/lib/listing-sections";
 
 type Props = {
   sections: Section[];
   onChange: (sections: Section[]) => void;
+  filter?: (type: SectionType) => boolean;
 };
 
-export function SectionEditors({ sections, onChange }: Props) {
+export function SectionEditors({ sections, onChange, filter }: Props) {
   function updateSection(index: number, patch: Partial<Section>) {
     const next = [...sections];
     next[index] = { ...next[index], ...patch };
     onChange(next);
   }
 
-  if (sections.length === 0) return null;
+  const filtered = filter ? sections.filter((s) => filter(s.type as SectionType)) : sections;
+
+  if (filtered.length === 0) return null;
 
   return (
     <div className="space-y-8">
-      <h2 className="text-lg font-semibold border-b pb-2">Page sections</h2>
-      {sections.map((section, i) => (
-        <fieldset key={section.id}>
-          <label className="block text-sm font-medium mb-2">{section.title}</label>
-          <SectionEditor section={section} onUpdate={(patch) => updateSection(i, patch)} />
-        </fieldset>
-      ))}
+      {filtered.map((section, i) => {
+        const actualIndex = sections.indexOf(section);
+        return (
+          <fieldset key={section.id}>
+            <label className="block text-sm font-medium mb-2">{section.title}</label>
+            <SectionEditor section={section} onUpdate={(patch) => updateSection(actualIndex, patch)} />
+          </fieldset>
+        );
+      })}
     </div>
   );
 }

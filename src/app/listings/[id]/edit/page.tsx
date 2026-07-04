@@ -84,7 +84,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   if (fetching) return <div className="text-center py-16 text-zinc-500">Loading...</div>;
 
   return (
-    <div className="mx-auto max-w-2xl mt-8 px-4">
+    <div className="mx-auto max-w-4xl mt-8 px-4">
       <h1 className="text-2xl font-bold mb-6">Edit listing</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -140,7 +140,25 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
 
         <hr className="my-6" />
 
-        <SectionEditors sections={sections} onChange={setSections} />
+        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+          <div className="space-y-8">
+            <h2 className="text-lg font-semibold border-b pb-2">Content</h2>
+            <SectionEditors
+              sections={sections}
+              onChange={setSections}
+              filter={(t) => t !== "specs" && t !== "gallery"}
+            />
+          </div>
+
+          <div className="space-y-8">
+            <h2 className="text-lg font-semibold border-b pb-2">Details</h2>
+            <SectionEditors
+              sections={sections}
+              onChange={setSections}
+              filter={(t) => t === "specs" || t === "gallery"}
+            />
+          </div>
+        </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
