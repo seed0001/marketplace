@@ -3,12 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function NewListing() {
   const router = useRouter();
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   if (!session) {
     return (
@@ -24,8 +26,6 @@ export default function NewListing() {
     setError("");
 
     const form = new FormData(e.currentTarget);
-    const imagesStr = form.get("images") as string;
-    const images = imagesStr ? imagesStr.split("\n").map((s) => s.trim()).filter(Boolean) : [];
 
     const res = await fetch("/api/listings", {
       method: "POST",
@@ -106,13 +106,8 @@ export default function NewListing() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Image URLs (one per line)</label>
-          <textarea
-            name="images"
-            rows={3}
-            placeholder="https://example.com/image1.jpg"
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
-          />
+          <label className="block text-sm font-medium mb-1">Photos</label>
+          <ImageUpload value={images} onChange={setImages} />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button

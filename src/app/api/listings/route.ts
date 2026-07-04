@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
+import { sanitizeImages } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         price: parseFloat(price),
-        images: images || [],
+        images: sanitizeImages(images),
         category: category || null,
         condition: condition || null,
         userId: session.user.id,
