@@ -11,6 +11,7 @@ export default function NewListing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [readme, setReadme] = useState("");
 
   if (!session) {
     return (
@@ -32,10 +33,10 @@ export default function NewListing() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: form.get("title"),
-        description: form.get("description"),
-        price: form.get("price"),
+        price: parseFloat(form.get("price") as string),
         images,
         category: form.get("category"),
+        readme,
       }),
     });
 
@@ -62,15 +63,32 @@ export default function NewListing() {
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Description *</label>
+          <label className="block text-sm font-medium mb-1">README</label>
+          <p className="text-xs text-zinc-400 mb-2">
+            Upload a README.md — headings become page sections
+          </p>
+          <input
+            type="file"
+            accept=".md,text/markdown"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setReadme(await file.text());
+            }}
+            className="block w-full text-xs text-zinc-500 file:mr-2 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
+          />
           <textarea
-            name="description"
-            required
-            rows={4}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+            name="readme"
+            value={readme}
+            onChange={(e) => setReadme(e.target.value)}
+            rows={16}
+            placeholder="Paste or write your README markdown..."
+            className="w-full mt-2 rounded-lg border px-4 py-3 text-sm font-mono outline-none focus:border-emerald-500 resize-y"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Price ($) *</label>
           <input

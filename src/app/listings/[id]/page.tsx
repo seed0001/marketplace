@@ -4,14 +4,10 @@ import { formatPrice, formatDate } from "@/lib/utils";
 import { ListingActions } from "./ListingActions";
 import { auth } from "@/lib/auth";
 import { SectionRenderer } from "@/components/listing-sections/SectionRenderer";
-import type { Section, SectionType } from "@/lib/listing-sections";
 import { parseReadme } from "@/lib/listing-sections";
+import type { Section } from "@/lib/listing-sections";
 
 export const dynamic = "force-dynamic";
-
-function isSidebarType(type: SectionType) {
-  return type === "specs" || type === "gallery";
-}
 
 export default async function ListingPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -31,11 +27,9 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   if (!listing) notFound();
 
   const isOwner = session?.user?.id === listing.userId;
-  const sections = listing.sections as Section[] | null;
-  const hasSections = sections && sections.length > 0;
-  const mainSections = sections?.filter((s) => !isSidebarType(s.type as SectionType)) ?? [];
-  const sidebarSections = sections?.filter((s) => isSidebarType(s.type as SectionType)) ?? [];
   const readmeSections = listing.readme ? parseReadme(listing.readme) : [];
+  const manualSections = listing.sections as Section[] | null;
+  const hasContent = readmeSections.length > 0 || (manualSections && manualSections.length > 0);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -65,7 +59,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </span>
           )}
 
-          {!hasSections && (
+          {!hasContent && (
             <p className="text-zinc-600 leading-relaxed">{listing.description}</p>
           )}
 
@@ -83,27 +77,15 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
         </div>
       </div>
 
-      {/* Content columns */}
-      {(hasSections || readmeSections.length > 0) && (
-        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
-          <div>
-            {mainSections.map((section) => (
-              <SectionRenderer key={section.id} section={section} />
-            ))}
-            {readmeSections.length > 0 && (
-              <div className="border-t pt-8">
-                {readmeSections.map((section) => (
-                  <SectionRenderer key={section.id} section={section} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <aside className="space-y-8">
-            {sidebarSections.map((section) => (
-              <SectionRenderer key={section.id} section={section} />
-            ))}
-          </aside>
+      {/* Content */}
+      {hasContent && (
+        <div className="max-w-3xl">
+          {manualSections?.map((section) => (
+            <SectionRenderer key={section.id} section={section} />
+          ))}
+          {readmeSections.map((section) => (
+            <SectionRenderer key={section.id} section={section} />
+          ))}
         </div>
       )}
 

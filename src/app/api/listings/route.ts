@@ -54,14 +54,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, price, images, category, condition, sections, readme } = body;
 
-    if (!title || !description || !price) {
+    if (!title || price === undefined || price === null || price === "") {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const listing = await prisma.listing.create({
       data: {
         title,
-        description,
+        description: description ?? "",
         price: parseFloat(price),
         images: sanitizeImages(images),
         category: category || null,

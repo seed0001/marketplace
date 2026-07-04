@@ -4,11 +4,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
-import { SectionEditors } from "@/components/SectionEditors";
-import { createDefaultSection } from "@/lib/listing-sections";
-import type { Section, SectionType } from "@/lib/listing-sections";
-
-const allTypes: SectionType[] = ["richtext", "specs", "features", "gallery", "faq", "changelog"];
 
 export default function EditListingPage(props: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -18,11 +13,9 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   const [error, setError] = useState("");
   const [id, setId] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const [sections, setSections] = useState<Section[]>([]);
   const [readme, setReadme] = useState("");
   const [form, setForm] = useState({
     title: "",
-    description: "",
     price: "",
     category: "",
   });
@@ -38,16 +31,10 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
       .then((data) => {
         setForm({
           title: data.title,
-          description: data.description,
           price: data.price.toString(),
           category: data.category || "",
         });
         setImages(Array.isArray(data.images) ? data.images : []);
-        if (Array.isArray(data.sections) && data.sections.length > 0) {
-          setSections(data.sections);
-        } else {
-          setSections(allTypes.map((t, i) => createDefaultSection(t, i)));
-        }
         setReadme(data.readme ?? "");
         setFetching(false);
       })
@@ -70,7 +57,13 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     const res = await fetch(`/api/listings/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, price: parseFloat(form.price), images, sections, readme }),
+      body: JSON.stringify({
+        title: form.title,
+        price: parseFloat(form.price),
+        category: form.category,
+        images,
+        readme,
+      }),
     });
 
     if (!res.ok) {
@@ -86,7 +79,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   if (fetching) return <div className="text-center py-16 text-zinc-500">Loading...</div>;
 
   return (
-    <div className="mx-auto max-w-4xl mt-8 px-4">
+    <div className="mx-auto max-w-lg mt-8 px-4">
       <h1 className="text-2xl font-bold mb-6">Edit listing</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -98,16 +91,31 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm font-medium mb-1">README</label>
+          <p className="text-xs text-zinc-400 mb-2">
+            Upload a README.md — headings become page sections
+          </p>
+          <input
+            type="file"
+            accept=".md,text/markdown"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setReadme(await file.text());
+            }}
+            className="block w-full text-xs text-zinc-500 file:mr-2 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
+          />
           <textarea
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            required
-            rows={4}
-            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+            value={readme}
+            onChange={(e) => setReadme(e.target.value)}
+            rows={16}
+            placeholder="Paste or write your README markdown..."
+            className="w-full mt-2 rounded-lg border px-4 py-3 text-sm font-mono outline-none focus:border-emerald-500 resize-y"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Price ($)</label>
           <input
@@ -119,6 +127,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Type</label>
           <select
@@ -135,58 +144,10 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             <option value="Component">Component</option>
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>
           <ImageUpload value={images} onChange={setImages} />
-        </div>
-
-        <hr className="my-6" />
-
-        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-          <div className="space-y-8">
-            <h2 className="text-lg font-semibold border-b pb-2">Content</h2>
-            <SectionEditors
-              sections={sections}
-              onChange={setSections}
-              filter={(t) => t !== "specs" && t !== "gallery"}
-            />
-          </div>
-
-          <div className="space-y-8">
-            <h2 className="text-lg font-semibold border-b pb-2">Details</h2>
-            <SectionEditors
-              sections={sections}
-              onChange={setSections}
-              filter={(t) => t === "specs" || t === "gallery"}
-            />
-
-            <div>
-              <label className="block text-sm font-medium mb-2">README</label>
-              <p className="text-xs text-zinc-400 mb-2">
-                Upload a README.md — headings become page sections
-              </p>
-              <input
-                type="file"
-                accept=".md,text/markdown"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const text = await file.text();
-                  setReadme(text);
-                }}
-                className="block w-full text-xs text-zinc-500 file:mr-2 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
-              />
-              {readme && (
-                <textarea
-                  value={readme}
-                  onChange={(e) => setReadme(e.target.value)}
-                  rows={12}
-                  placeholder="Paste or edit your README markdown..."
-                  className="w-full mt-2 rounded-lg border px-3 py-2 text-xs font-mono outline-none focus:border-emerald-500 resize-y"
-                />
-              )}
-            </div>
-          </div>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
