@@ -10,13 +10,12 @@ export function Footer() {
           <div className="max-w-xs">
             <Link href="/" className="flex items-center gap-2 text-zinc-900">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-base font-bold text-white">
-                M
+                V
               </span>
-              <span className="text-lg font-bold tracking-tight">Marketplace</span>
+              <span className="text-lg font-bold tracking-tight">VibeMarket</span>
             </Link>
             <p className="mt-3 text-sm text-muted">
-              The marketplace for developers. Buy, sell, and trade dev tools,
-              domains, side projects, and more.
+              Showcase and sell what you build with AI — apps, agents, automations, and more.
             </p>
           </div>
 
@@ -27,12 +26,12 @@ export function Footer() {
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link href="/listings" className="text-zinc-600 hover:text-emerald-600 transition-colors">
-                  Browse listings
+                  Browse builds
                 </Link>
               </li>
               <li>
                 <Link href="/listings/new" className="text-zinc-600 hover:text-emerald-600 transition-colors">
-                  Sell something
+                  Sell your build
                 </Link>
               </li>
             </ul>
@@ -66,15 +65,15 @@ export function Footer() {
               About
             </h3>
             <p className="mt-3 text-sm text-muted">
-              A community-run marketplace built by developers, for developers.
-              List in minutes, message buyers directly, close the deal.
+              A marketplace for AI builders. Showcase your latest project,
+              connect with buyers, and ship on your terms.
             </p>
           </div>
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted sm:flex-row">
-          <p>&copy; {year} Marketplace. All rights reserved.</p>
-          <p>Built for developers.</p>
+          <p>&copy; {year} VibeMarket. All rights reserved.</p>
+          <p>Built for AI builders.</p>
         </div>
       </div>
     </footer>

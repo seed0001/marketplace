@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Marketplace design system
+ * VibeMarket design system
  * Committed light theme. The previous prefers-color-scheme:dark block flipped
  * text to light gray while backgrounds stayed white, which washed out the
  * navbar and other surfaces. We now ship a single, consistent light theme.
