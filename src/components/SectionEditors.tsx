@@ -105,10 +105,10 @@ function SpecsEditor({
             placeholder="Value"
             className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
-          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
+          <button type="button" onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add row</button>
+      <button type="button" onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add row</button>
     </div>
   );
 }
@@ -141,10 +141,10 @@ function FeaturesEditor({
             placeholder="Feature"
             className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
-          <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
+          <button type="button" onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add feature</button>
+      <button type="button" onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add feature</button>
     </div>
   );
 }
@@ -188,7 +188,7 @@ function FaqEditor({
               placeholder="Question"
               className="flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
             />
-            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
+            <button type="button" onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
           </div>
           <textarea
             value={item.answer}
@@ -199,7 +199,7 @@ function FaqEditor({
           />
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add Q&A</button>
+      <button type="button" onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add Q&A</button>
     </div>
   );
 }
@@ -239,7 +239,7 @@ function ChangelogEditor({
               placeholder="2024-01-01"
               className="w-1/3 rounded-lg border px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
             />
-            <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
+            <button type="button" onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600 px-1">&times;</button>
           </div>
           <textarea
             value={item.notes}
@@ -250,7 +250,7 @@ function ChangelogEditor({
           />
         </div>
       ))}
-      <button onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add entry</button>
+      <button type="button" onClick={addItem} className="text-sm text-emerald-600 hover:text-emerald-700">+ Add entry</button>
     </div>
   );
 }
