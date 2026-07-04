@@ -52,6 +52,10 @@ export async function PUT(
       data.sections = body.sections;
     }
 
+    if (body.readme !== undefined) {
+      data.readme = body.readme;
+    }
+
     const updated = await prisma.listing.update({
       where: { id },
       data,

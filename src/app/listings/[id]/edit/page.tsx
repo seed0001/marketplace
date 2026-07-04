@@ -19,6 +19,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   const [id, setId] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
+  const [readme, setReadme] = useState("");
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -47,6 +48,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
         } else {
           setSections(allTypes.map((t, i) => createDefaultSection(t, i)));
         }
+        setReadme(data.readme ?? "");
         setFetching(false);
       })
       .catch(() => setFetching(false));
@@ -68,7 +70,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     const res = await fetch(`/api/listings/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, price: parseFloat(form.price), images, sections }),
+      body: JSON.stringify({ ...form, price: parseFloat(form.price), images, sections, readme }),
     });
 
     if (!res.ok) {
@@ -157,6 +159,33 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
               onChange={setSections}
               filter={(t) => t === "specs" || t === "gallery"}
             />
+
+            <div>
+              <label className="block text-sm font-medium mb-2">README</label>
+              <p className="text-xs text-zinc-400 mb-2">
+                Upload a README.md — headings become page sections
+              </p>
+              <input
+                type="file"
+                accept=".md,text/markdown"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const text = await file.text();
+                  setReadme(text);
+                }}
+                className="block w-full text-xs text-zinc-500 file:mr-2 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
+              />
+              {readme && (
+                <textarea
+                  value={readme}
+                  onChange={(e) => setReadme(e.target.value)}
+                  rows={12}
+                  placeholder="Paste or edit your README markdown..."
+                  className="w-full mt-2 rounded-lg border px-3 py-2 text-xs font-mono outline-none focus:border-emerald-500 resize-y"
+                />
+              )}
+            </div>
           </div>
         </div>
 

@@ -56,3 +56,37 @@ export function sectionLabel(type: SectionType): string {
   };
   return labels[type];
 }
+
+export function parseReadme(readme: string): Section[] {
+  const sections: Section[] = [];
+  const blocks = readme.split(/^## .+/m);
+  const headings = readme.match(/^## .+/gm) ?? [];
+
+  let order = 0;
+
+  const before = blocks[0]?.trim();
+  if (before) {
+    sections.push({
+      id: crypto.randomUUID() as string,
+      type: "richtext",
+      title: "README",
+      content: before,
+      order: order++,
+    });
+  }
+
+  for (let i = 0; i < headings.length; i++) {
+    const title = headings[i].replace(/^## /, "").trim();
+    const content = blocks[i + 1]?.trim() || "";
+    if (!title && !content) continue;
+    sections.push({
+      id: crypto.randomUUID() as string,
+      type: "richtext",
+      title,
+      content,
+      order: order++,
+    });
+  }
+
+  return sections;
+}

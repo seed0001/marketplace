@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
     const body = await request.json();
-    const { title, description, price, images, category, condition, sections } = body;
+    const { title, description, price, images, category, condition, sections, readme } = body;
 
     if (!title || !description || !price) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
         category: category || null,
         condition: condition || null,
         sections: sections || undefined,
+        readme: readme || undefined,
         userId: session.user.id,
       },
       include: { user: { select: { id: true, name: true, image: true } } },

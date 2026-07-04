@@ -5,6 +5,7 @@ import { ListingActions } from "./ListingActions";
 import { auth } from "@/lib/auth";
 import { SectionRenderer } from "@/components/listing-sections/SectionRenderer";
 import type { Section, SectionType } from "@/lib/listing-sections";
+import { parseReadme } from "@/lib/listing-sections";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   const hasSections = sections && sections.length > 0;
   const mainSections = sections?.filter((s) => !isSidebarType(s.type as SectionType)) ?? [];
   const sidebarSections = sections?.filter((s) => isSidebarType(s.type as SectionType)) ?? [];
+  const readmeSections = listing.readme ? parseReadme(listing.readme) : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -82,12 +84,19 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
       </div>
 
       {/* Content columns */}
-      {hasSections && (
+      {(hasSections || readmeSections.length > 0) && (
         <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
           <div>
             {mainSections.map((section) => (
               <SectionRenderer key={section.id} section={section} />
             ))}
+            {readmeSections.length > 0 && (
+              <div className="border-t pt-8">
+                {readmeSections.map((section) => (
+                  <SectionRenderer key={section.id} section={section} />
+                ))}
+              </div>
+            )}
           </div>
 
           <aside className="space-y-8">
