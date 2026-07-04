@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { sanitizeImages } from "@/lib/utils";
+import { normalizeGithubUrl } from "@/lib/github";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
     const body = await request.json();
-    const { title, description, price, images, category, condition } = body;
+    const { title, description, price, images, category, condition, githubUrl } = body;
 
     if (!title || !description || !price) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
         images: sanitizeImages(images),
         category: category || null,
         condition: condition || null,
+        githubUrl: normalizeGithubUrl(githubUrl),
         userId: session.user.id,
       },
       include: { user: { select: { id: true, name: true, image: true } } },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { sanitizeImages } from "@/lib/utils";
+import { normalizeGithubUrl } from "@/lib/github";
 
 export async function GET(
   _request: NextRequest,
@@ -47,6 +48,7 @@ export async function PUT(
         images: sanitizeImages(body.images),
         category: body.category,
         condition: body.condition,
+        githubUrl: body.githubUrl !== undefined ? normalizeGithubUrl(body.githubUrl) : undefined,
         status: body.status,
       },
     });

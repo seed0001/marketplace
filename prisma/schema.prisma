@@ -21,6 +21,8 @@ model User {
   conversationsAsBuyer  Conversation[] @relation("ConversationBuyer")
   conversationsAsSeller Conversation[] @relation("ConversationSeller")
   reviewsGiven Review[]        @relation("ReviewAuthor")
+  paymentMethods PaymentMethod[]
+  purchases      Purchase[]
 }
 
 model Listing {
@@ -32,6 +34,7 @@ model Listing {
   category    String?
   condition   String?
   status      String   @default("active")
+  githubUrl   String?
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -39,6 +42,7 @@ model Listing {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversations Conversation[]
   reviews      Review[]
+  purchases    Purchase[]
 
   @@index([userId])
   @@index([status])
@@ -90,4 +94,29 @@ model Review {
   author  User    @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   @@unique([listingId, authorId])
+}
+
+model PaymentMethod {
+  id     String @id @default(cuid())
+  userId String
+  type   String // "venmo" | "cashapp" | "paypal" | "zelle" | "other"
+  handle String // @user, $cashtag, email, or pay link
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  listingId String
+  buyerId   String
+  status    String   @default("pending") // "pending" | "paid"
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer   User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId])
 }

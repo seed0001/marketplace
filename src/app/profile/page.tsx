@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
+import { PaymentMethods } from "@/components/PaymentMethods";
 
 type Listing = {
   id: string;
@@ -51,6 +52,8 @@ export default function ProfilePage() {
           <p className="text-sm text-zinc-500">{session.user?.email}</p>
         </div>
       </div>
+
+      <PaymentMethods />
 
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold">My listings</h2>

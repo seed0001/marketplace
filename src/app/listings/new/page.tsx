@@ -37,6 +37,7 @@ export default function NewListing() {
         images,
         category: form.get("category"),
         condition: form.get("condition"),
+        githubUrl: form.get("githubUrl"),
       }),
     });
 
@@ -104,6 +105,17 @@ export default function NewListing() {
             <option value="fair">Fair</option>
             <option value="poor">Poor</option>
           </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">GitHub repo URL</label>
+          <input
+            name="githubUrl"
+            placeholder="https://github.com/owner/repo"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+          />
+          <p className="mt-1 text-xs text-zinc-500">
+            Optional. Buyers download a .zip of this repo through us — they&apos;re never sent to GitHub.
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>

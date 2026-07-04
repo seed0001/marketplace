@@ -19,6 +19,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     price: "",
     category: "",
     condition: "",
+    githubUrl: "",
   });
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
           price: data.price.toString(),
           category: data.category || "",
           condition: data.condition || "",
+          githubUrl: data.githubUrl || "",
         });
         setImages(Array.isArray(data.images) ? data.images : []);
         setFetching(false);
@@ -130,6 +132,18 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             <option value="fair">Fair</option>
             <option value="poor">Poor</option>
           </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">GitHub repo URL</label>
+          <input
+            value={form.githubUrl}
+            onChange={(e) => setForm({ ...form, githubUrl: e.target.value })}
+            placeholder="https://github.com/owner/repo"
+            className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+          />
+          <p className="mt-1 text-xs text-zinc-500">
+            Optional. Buyers download a .zip of this repo through us — they&apos;re never sent to GitHub.
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Photos</label>

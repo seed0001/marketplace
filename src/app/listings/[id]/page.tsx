@@ -13,7 +13,14 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   const listing = await prisma.listing.findUnique({
     where: { id },
     include: {
-      user: { select: { id: true, name: true, image: true } },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          paymentMethods: { select: { type: true, handle: true } },
+        },
+      },
       reviews: {
         include: { author: { select: { id: true, name: true, image: true } } },
         orderBy: { createdAt: "desc" },
@@ -24,6 +31,13 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
   if (!listing) notFound();
 
   const isOwner = session?.user?.id === listing.userId;
+
+  const purchased =
+    !!session?.user?.id &&
+    !isOwner &&
+    !!(await prisma.purchase.findUnique({
+      where: { listingId_buyerId: { listingId: listing.id, buyerId: session.user.id } },
+    }).then((p) => p?.status === "paid"));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -50,6 +64,12 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
 
           <p className="text-zinc-600">{listing.description}</p>
 
+          {listing.githubUrl && (
+            <p className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
+              ⬇ Includes downloadable files
+            </p>
+          )}
+
           <div className="flex items-center gap-3 text-sm text-zinc-500">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold">
               {listing.user.name?.[0]?.toUpperCase() || "U"}
@@ -59,7 +79,15 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             <span>{formatDate(listing.createdAt)}</span>
           </div>
 
-          <ListingActions listingId={listing.id} sellerId={listing.userId} isOwner={isOwner} />
+          <ListingActions
+            listingId={listing.id}
+            sellerId={listing.userId}
+            isOwner={isOwner}
+            price={listing.price}
+            hasDownload={!!listing.githubUrl}
+            purchased={purchased}
+            paymentMethods={listing.user.paymentMethods}
+          />
         </div>
       </div>
 
