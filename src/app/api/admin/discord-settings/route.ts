@@ -102,14 +102,16 @@ async function updateDiscordSettings(request: NextRequest) {
       create: {
         id: "default", enabled: input.enabled, guildId: input.guildId || null, applicationId: input.applicationId || null,
         openRouterModel: input.openRouterModel, updatedById: admin.id,
-        ...(() => {
-          const bot = botEncrypted!;
-          const ai = aiEncrypted!;
-          return {
-            encryptedBotToken: bot.encryptedApiKey, botTokenIv: bot.keyIv, botTokenTag: bot.keyTag,
-            encryptedOpenRouterKey: ai.encryptedApiKey, openRouterKeyIv: ai.keyIv, openRouterKeyTag: ai.keyTag,
-          };
-        })(),
+        ...(botEncrypted ? {
+          encryptedBotToken: botEncrypted.encryptedApiKey,
+          botTokenIv: botEncrypted.keyIv,
+          botTokenTag: botEncrypted.keyTag,
+        } : {}),
+        ...(aiEncrypted ? {
+          encryptedOpenRouterKey: aiEncrypted.encryptedApiKey,
+          openRouterKeyIv: aiEncrypted.keyIv,
+          openRouterKeyTag: aiEncrypted.keyTag,
+        } : {}),
       },
     }),
     ...input.channels.map((channel) => {
