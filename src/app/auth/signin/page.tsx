@@ -25,7 +25,9 @@ export default function SignIn() {
       setError("Invalid email or password");
       setLoading(false);
     } else {
-      router.push("/");
+      const requested = new URLSearchParams(window.location.search).get("callbackUrl");
+      const destination = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/listings";
+      router.push(destination);
       router.refresh();
     }
   }

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { ListingCard } from "@/components/ListingCard";
 import { SearchBar } from "@/components/SearchBar";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +10,8 @@ export default async function ListingsPage(props: {
   searchParams: Promise<{ q?: string; category?: string; minPrice?: string; maxPrice?: string; sort?: string }>;
 }) {
   const searchParams = await props.searchParams;
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin?callbackUrl=/listings");
   const where: Record<string, unknown> = { status: "active" };
 
   if (searchParams.q) {

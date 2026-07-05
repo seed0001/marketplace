@@ -31,7 +31,7 @@ export default function SignUp() {
       return;
     }
 
-    router.push("/auth/signin");
+    router.push("/auth/signin?callbackUrl=/listings");
   }
 
   return (

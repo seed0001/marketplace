@@ -19,11 +19,11 @@ export function Navbar() {
         </Link>
 
         <div className="hidden sm:flex items-center gap-6">
-          <Link href="/listings" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
-            Browse
-          </Link>
           {session ? (
             <>
+              <Link href="/listings" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
+                Browse
+              </Link>
               <Link
                 href="/listings/new"
                 className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors"
@@ -100,11 +100,11 @@ export function Navbar() {
 
       {menuOpen && (
         <div className="border-t border-border sm:hidden px-4 py-3 space-y-2 bg-surface">
-          <Link href="/listings" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
-            Browse
-          </Link>
           {session ? (
             <>
+              <Link href="/listings" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
+                Browse
+              </Link>
               <Link href="/listings/new" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 + Sell
               </Link>

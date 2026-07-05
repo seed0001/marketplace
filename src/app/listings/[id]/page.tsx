@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { ListingActions } from "./ListingActions";
 import { auth } from "@/lib/auth";
@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function ListingPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
   const session = await auth();
+  if (!session?.user?.id) redirect(`/auth/signin?callbackUrl=${encodeURIComponent(`/listings/${id}`)}`);
 
   const listing = await prisma.listing.findUnique({
     where: { id },

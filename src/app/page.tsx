@@ -1,118 +1,89 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { ListingCard } from "@/components/ListingCard";
+import { auth } from "@/lib/auth";
 
-export const dynamic = "force-dynamic";
+const steps = [
+  { number: "01", title: "Create your place", text: "Open an account and get a marketplace profile that grows with your listings, customer activity, reviews, and completed work." },
+  { number: "02", title: "Show the real work", text: "Publish products, services, projects, or expertise with images and README-powered pages that explain what buyers are getting." },
+  { number: "03", title: "Build with an AI partner", text: "Your private Seller AI can audit listings, read performance signals, surface priorities, and help draft thoughtful buyer replies." },
+  { number: "04", title: "Turn activity into proof", text: "Views, conversations, feedback, and reviews build a living portfolio—not a profile filled with unsupported claims." },
+];
 
 export default async function Home() {
-  const listings = await prisma.listing.findMany({
-    where: { status: "active" },
-    orderBy: { createdAt: "desc" },
-    take: 12,
-    include: { user: { select: { id: true, name: true, image: true } } },
-  });
+  const session = await auth();
+  const primaryHref = session ? "/listings" : "/auth/signup";
+  const primaryLabel = session ? "Enter the marketplace" : "Create your account";
 
   return (
-    <div>
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-black text-white">
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-emerald-500/20 blur-3xl" />
-        <div className="relative mx-auto max-w-5xl px-6 py-20 text-center">
-          <div className="inline-block mb-3 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-1 text-sm font-medium tracking-widest text-emerald-300">
-            FROM HOBBYIST TO ENTERPRISE
-          </div>
-          <h1 className="text-6xl font-semibold tracking-tighter">VibeMarket</h1>
-          <p className="mt-4 max-w-xl mx-auto text-lg text-zinc-400">
-            Sell what you make and the time it takes to make it — from weekend
-            projects to enterprise systems. Every sale builds a portfolio that
-            proves what you can do.
-          </p>
-
-          <div className="mt-8 flex justify-center gap-4">
-            <Link
-              href="/listings"
-              className="rounded-full bg-emerald-600 px-8 py-3 text-sm font-medium text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-500"
-            >
-              Browse the market
-            </Link>
-            <Link
-              href="/listings/new"
-              className="rounded-full border border-white/20 px-8 py-3 text-sm font-medium transition hover:bg-white/10"
-            >
-              Start selling
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Positioning */}
-      <div className="border-b border-border bg-surface">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <div className="grid gap-10 md:grid-cols-3">
-            <div>
-              <div className="text-sm font-semibold tracking-wide text-emerald-600">
-                SELL ANYTHING
-              </div>
-              <h3 className="mt-2 text-xl font-semibold tracking-tight">
-                Products <span className="text-muted">and</span> services
-              </h3>
-              <p className="mt-2 text-sm text-muted">
-                A $5 template, a finished side project, or your time as an
-                architect. List a thing you made or the expertise to build one.
-              </p>
-            </div>
-            <div>
-              <div className="text-sm font-semibold tracking-wide text-emerald-600">
-                FOR EVERY MAKER
-              </div>
-              <h3 className="mt-2 text-xl font-semibold tracking-tight">
-                Hobbyist <span className="text-muted">to</span> enterprise
-              </h3>
-              <p className="mt-2 text-sm text-muted">
-                Weekend tinkerers, indie makers, freelancers, and enterprise
-                architects share one marketplace — sell at any scale, on your
-                terms.
-              </p>
-            </div>
-            <div>
-              <div className="text-sm font-semibold tracking-wide text-emerald-600">
-                BUILD YOUR REPUTATION
-              </div>
-              <h3 className="mt-2 text-xl font-semibold tracking-tight">
-                A portfolio that proves it
-              </h3>
-              <p className="mt-2 text-sm text-muted">
-                Every listing, sale, and review feeds a living portfolio of who
-                you are, what you&apos;ve built, and your track record with
-                customers.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent listings */}
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="flex items-end justify-between mb-8">
+    <div className="overflow-hidden text-zinc-100">
+      <section className="relative border-b border-white/10 px-6 py-24 sm:py-32">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[34rem] w-[54rem] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[110px]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.15fr_.85fr]">
           <div>
-            <div className="text-sm text-emerald-600 font-medium tracking-wide">RECENT</div>
-            <h2 className="text-3xl font-semibold tracking-tight">Just listed</h2>
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[.06] px-4 py-2 text-[10px] font-bold uppercase tracking-[.22em] text-emerald-300">
+              A marketplace for people who build
+            </div>
+            <h1 className="mt-7 max-w-4xl text-5xl font-semibold leading-[.96] tracking-[-.055em] sm:text-7xl">
+              Put your work in the market. <span className="text-zinc-500">Build a reputation around it.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+              VibeMarket gives builders one place to sell products, services, projects, and expertise—with a portfolio that records the work and an AI partner that helps improve it.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href={primaryHref} className="rounded-full bg-emerald-400 px-7 py-3.5 text-sm font-semibold text-black transition hover:bg-emerald-300">{primaryLabel} →</Link>
+              {!session && <Link href="/auth/signin?callbackUrl=/listings" className="rounded-full border border-white/15 px-7 py-3.5 text-sm font-medium text-zinc-300 transition hover:bg-white/[.06]">Sign in to browse</Link>}
+            </div>
+            <p className="mt-4 text-xs text-zinc-600">The full catalog is available to signed-in members.</p>
           </div>
-          <Link href="/listings" className="text-sm font-medium hover:underline">
-            View all →
-          </Link>
-        </div>
 
-        {listings.length === 0 ? (
-          <div className="py-20 text-center text-zinc-500">Nothing listed yet. Be the first to sell something!</div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
-            ))}
+          <div className="relative mx-auto w-full max-w-lg">
+            <div className="absolute -inset-4 rounded-[36px] bg-gradient-to-br from-emerald-400/15 to-violet-500/10 blur-2xl" />
+            <div className="relative rounded-[30px] border border-white/10 bg-[#0b0f0e]/90 p-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-white/[.07] pb-4">
+                <div><div className="text-[9px] font-bold uppercase tracking-[.2em] text-emerald-400">Your builder workspace</div><div className="mt-1 text-sm text-zinc-300">Profile, market, intelligence</div></div>
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-300 to-emerald-700" />
+              </div>
+              <div className="mt-5 grid grid-cols-3 gap-2">
+                {[["Listings", "Live"], ["Portfolio", "Growing"], ["Seller AI", "Ready"]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/[.07] bg-white/[.03] p-3"><div className="text-[9px] uppercase tracking-wider text-zinc-600">{label}</div><div className="mt-2 text-xs font-medium text-zinc-200">{value}</div></div>)}
+              </div>
+              <div className="mt-3 rounded-2xl border border-violet-400/15 bg-violet-400/[.04] p-5">
+                <div className="flex items-center gap-2 text-xs font-medium text-violet-300"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-400/15">✦</span> Private Seller AI</div>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">“Your strongest listing has attention but no buyer conversations. Let’s tighten the offer and clarify the next step.”</p>
+              </div>
+              <div className="mt-3 flex items-center justify-between rounded-xl border border-white/[.07] px-4 py-3 text-xs"><span className="text-zinc-500">Marketplace signal</span><span className="text-emerald-300">Real activity → real proof</span></div>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
+
+      <section className="border-b border-white/[.07] bg-black/20 px-6 py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-2xl"><div className="text-[10px] font-bold uppercase tracking-[.25em] text-emerald-400">How VibeMarket works</div><h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">A storefront is only the beginning.</h2><p className="mt-4 text-sm leading-6 text-zinc-500">The platform connects what you make, how people respond, and what you should improve next.</p></div>
+          <div className="mt-10 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step) => <div key={step.number} className="bg-[#090c0b] p-7"><div className="font-mono text-xs text-emerald-500">{step.number}</div><h3 className="mt-8 text-lg font-semibold">{step.title}</h3><p className="mt-3 text-sm leading-6 text-zinc-500">{step.text}</p></div>)}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
+          <div className="rounded-[30px] border border-white/10 bg-gradient-to-br from-emerald-400/[.08] to-transparent p-8 sm:p-10">
+            <div className="text-[10px] font-bold uppercase tracking-[.22em] text-emerald-400">For builders and sellers</div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight">Your work gets a home—and a history.</h2>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Create rich listing pages, show your websites, talk directly with interested buyers, and let verified marketplace activity strengthen your profile over time.</p>
+            <ul className="mt-7 space-y-3 text-sm text-zinc-400">{["README-powered product and service pages", "Private views, inquiry, and feedback signals", "AI-assisted audits, priorities, and reply drafting"].map((item) => <li key={item} className="flex gap-3"><span className="text-emerald-400">✓</span>{item}</li>)}</ul>
+          </div>
+          <div className="rounded-[30px] border border-white/10 bg-gradient-to-br from-violet-400/[.08] to-transparent p-8 sm:p-10">
+            <div className="text-[10px] font-bold uppercase tracking-[.22em] text-violet-300">For buyers and collaborators</div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight">Find the person behind the listing.</h2>
+            <p className="mt-4 text-sm leading-7 text-zinc-400">Signed-in members can explore the full catalog, see the builder’s body of work, start a focused conversation, and leave feedback that means something.</p>
+            <div className="mt-8"><Link href={primaryHref} className="inline-flex rounded-full border border-violet-300/25 bg-violet-400/10 px-6 py-3 text-sm font-medium text-violet-200 hover:bg-violet-400/15">{primaryLabel}</Link></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-white/[.07] px-6 py-20 text-center">
+        <div className="mx-auto max-w-3xl"><div className="text-[10px] font-bold uppercase tracking-[.25em] text-emerald-400">Build in public. Operate with intelligence.</div><h2 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">Bring the work. We’ll help you build the market around it.</h2><div className="mt-8"><Link href={primaryHref} className="inline-flex rounded-full bg-emerald-400 px-8 py-4 text-sm font-semibold text-black hover:bg-emerald-300">{primaryLabel} →</Link></div></div>
+      </section>
     </div>
   );
 }
