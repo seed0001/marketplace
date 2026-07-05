@@ -29,6 +29,7 @@ export function StudioChat({
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const optimisticId = useRef(0);
@@ -67,18 +68,46 @@ export function StudioChat({
     }
   }
 
+  async function clearChat() {
+    if (!threadId || clearing || sending) return;
+    if (!window.confirm("Clear this chat log? Vibe will keep your long-term business memories.")) return;
+    setClearing(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/seller-ai/chat?threadId=${encodeURIComponent(threadId)}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not clear this chat.");
+      setMessages([]);
+      setThreadId(null);
+      setInput("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not clear this chat.");
+    } finally {
+      setClearing(false);
+    }
+  }
+
   return (
     <section className="flex h-[72dvh] min-h-0 flex-col overflow-hidden rounded-[24px] border border-emerald-400/20 bg-[#0d1211] shadow-2xl shadow-black/30 xl:h-[calc(100dvh-13rem)]">
       <header className="border-b border-white/[.07] bg-gradient-to-r from-emerald-400/[.08] to-transparent px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400 text-base font-black text-black">
-            V
-            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-[2px] border-[#0d1211] bg-emerald-300" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400 text-base font-black text-black">
+              V
+              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-[2px] border-[#0d1211] bg-emerald-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2"><h2 className="text-sm font-semibold text-white">Vibe</h2><span className="rounded-full bg-emerald-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-emerald-300">Seller AI</span></div>
+              <p className="text-[10px] text-zinc-500">Private business partner · remembers your work</p>
+            </div>
           </div>
-          <div>
-            <div className="flex items-center gap-2"><h2 className="text-sm font-semibold text-white">Vibe</h2><span className="rounded-full bg-emerald-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-emerald-300">Seller AI</span></div>
-            <p className="text-[10px] text-zinc-500">Private business partner · remembers your work</p>
-          </div>
+          {threadId && messages.length > 0 && (
+            <button onClick={clearChat} disabled={clearing || sending} className="rounded-lg border border-white/[.07] px-2.5 py-1.5 text-[9px] font-medium uppercase tracking-wider text-zinc-500 transition hover:border-red-400/20 hover:bg-red-400/[.05] hover:text-red-300 disabled:opacity-40" title="Delete this chat transcript but keep long-term seller memory">
+              {clearing ? "Clearing…" : "↻ Clear chat"}
+            </button>
+          )}
         </div>
       </header>
 

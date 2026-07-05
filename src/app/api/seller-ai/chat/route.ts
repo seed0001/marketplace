@@ -35,6 +35,25 @@ export function isClassifierOnlyResponse(content: string) {
   );
 }
 
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await requireAuth();
+    const threadId = new URL(request.url).searchParams.get("threadId");
+    if (!threadId) return NextResponse.json({ error: "Thread required" }, { status: 400 });
+
+    const deleted = await prisma.sellerAiThread.deleteMany({
+      where: { id: threadId, userId: session.user.id },
+    });
+    if (!deleted.count) return NextResponse.json({ error: "Chat not found" }, { status: 404 });
+
+    // SellerMemory is intentionally retained. Clearing a transcript should
+    // reduce chat history without erasing durable goals and preferences.
+    return NextResponse.json({ cleared: true });
+  } catch {
+    return NextResponse.json({ error: "Unable to clear chat" }, { status: 401 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
