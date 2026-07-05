@@ -68,7 +68,7 @@ export function StudioChat({
   }
 
   return (
-    <section className="flex min-h-[720px] flex-col overflow-hidden rounded-[28px] border border-emerald-400/20 bg-[#0d1211] shadow-2xl shadow-black/30">
+    <section className="flex h-[72dvh] min-h-0 flex-col overflow-hidden rounded-[24px] border border-emerald-400/20 bg-[#0d1211] shadow-2xl shadow-black/30 xl:h-[calc(100dvh-13rem)]">
       <header className="border-b border-white/[.07] bg-gradient-to-r from-emerald-400/[.08] to-transparent px-6 py-5">
         <div className="flex items-center gap-3">
           <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400 text-lg font-black text-black">
@@ -82,7 +82,7 @@ export function StudioChat({
         </div>
       </header>
 
-      <div className="flex-1 space-y-5 overflow-y-auto px-5 py-6">
+      <div className="studio-chat-scroll min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-6">
         {messages.length === 0 && (
           <div className="mx-auto max-w-md pt-12 text-center">
             <div className="text-3xl">✦</div>

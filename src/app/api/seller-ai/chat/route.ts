@@ -5,9 +5,35 @@ import { buildSellerSystemPrompt, getSellerBusinessContext } from "@/lib/seller-
 import { getOpenRouterConfiguration } from "@/lib/ai-settings";
 
 const MAX_MESSAGE_LENGTH = 6000;
+const MAX_CLASSIFIER_RETRIES = 2;
 const MEMORY_PATTERN = /<!--MEMORY:(\[[\s\S]*?\])-->/;
 
 type MemoryCandidate = { kind?: unknown; content?: unknown };
+type OpenRouterMessage = { role: "system" | "user" | "assistant"; content: string };
+type OpenRouterResult = {
+  model?: string;
+  choices?: { message?: { content?: string } }[];
+};
+
+export function isClassifierOnlyResponse(content: string) {
+  if (!content.trim() || content.length > 240) return false;
+  const normalized = content
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/[^a-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = normalized.split(" ");
+  if (words.length > 12) return false;
+
+  return (
+    normalized === "user safety safe" ||
+    normalized === "user safety is safe" ||
+    normalized === "safety safe" ||
+    normalized === "classification user safety safe" ||
+    (normalized.includes("user safety") && /\bsafe\b/.test(normalized))
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,39 +81,64 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.AUTH_URL || "https://vibemarket.app",
-        "X-OpenRouter-Title": "VibeMarket Seller Studio",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: buildSellerSystemPrompt(context) },
-          ...history.reverse().map((message) => ({
-            role: message.role === "assistant" ? "assistant" : "user",
-            content: message.content,
-          })),
-        ],
-        temperature: 0.7,
-        max_tokens: 1400,
-      }),
-      signal: AbortSignal.timeout(60000),
-    });
+    const providerMessages: OpenRouterMessage[] = [
+      { role: "system", content: buildSellerSystemPrompt(context) },
+      ...history.reverse().map((message) => ({
+        role: message.role === "assistant" ? "assistant" as const : "user" as const,
+        content: message.content,
+      })),
+    ];
+    let result: OpenRouterResult | null = null;
+    let rawReply = "";
 
-    if (!response.ok) {
-      const error = await response.text();
-      console.error("OpenRouter error", response.status, error.slice(0, 500));
-      return NextResponse.json({ error: "The AI provider could not complete that request." }, { status: 502 });
+    for (let attempt = 0; attempt <= MAX_CLASSIFIER_RETRIES; attempt += 1) {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": process.env.AUTH_URL || "https://vibemarket.app",
+          "X-OpenRouter-Title": "VibeMarket Seller Studio",
+        },
+        body: JSON.stringify({
+          model,
+          messages: providerMessages,
+          temperature: 0.7,
+          max_tokens: 1400,
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("OpenRouter error", response.status, error.slice(0, 500));
+        return NextResponse.json({ error: "The AI provider could not complete that request." }, { status: 502 });
+      }
+
+      result = await response.json() as OpenRouterResult;
+      rawReply = result.choices?.[0]?.message?.content || "";
+      if (!isClassifierOnlyResponse(rawReply)) break;
+
+      console.warn(`OpenRouter returned classifier-only output; retrying seller response (${attempt + 1})`);
+      providerMessages.push(
+        { role: "assistant", content: rawReply },
+        {
+          role: "user",
+          content:
+            "That was only an internal safety-classifier label, not a response to my request. Do not repeat or discuss the classifier result. Continue the original conversation now and give the complete, useful seller-business answer I asked for.",
+        },
+      );
     }
 
-    const result = await response.json();
-    const rawReply = result?.choices?.[0]?.message?.content;
     if (typeof rawReply !== "string" || !rawReply.trim()) {
       return NextResponse.json({ error: "The AI returned an empty response." }, { status: 502 });
+    }
+    if (isClassifierOnlyResponse(rawReply)) {
+      console.error("OpenRouter repeatedly returned classifier-only output", { model });
+      return NextResponse.json(
+        { error: "OpenRouter repeatedly routed this request to a classifier. Please try again." },
+        { status: 502 },
+      );
     }
 
     const memoryMatch = rawReply.match(MEMORY_PATTERN);
@@ -112,7 +163,7 @@ export async function POST(request: NextRequest) {
     }
 
     const saved = await prisma.sellerAiMessage.create({
-      data: { threadId: thread.id, role: "assistant", content: reply, model: result.model || model },
+      data: { threadId: thread.id, role: "assistant", content: reply, model: result?.model || model },
     });
     await prisma.sellerAiThread.update({ where: { id: thread.id }, data: { updatedAt: new Date() } });
 

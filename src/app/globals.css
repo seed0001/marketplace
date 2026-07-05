@@ -57,6 +57,30 @@ select option {
   color: var(--foreground);
 }
 
+.studio-chat-scroll,
+.studio-sidebar {
+  scrollbar-color: rgba(52, 211, 153, 0.45) rgba(255, 255, 255, 0.035);
+  scrollbar-width: thin;
+}
+
+.studio-chat-scroll::-webkit-scrollbar,
+.studio-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.studio-chat-scroll::-webkit-scrollbar-track,
+.studio-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.studio-chat-scroll::-webkit-scrollbar-thumb,
+.studio-sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.38);
+  background-clip: padding-box;
+}
+
 /* Marketplace-wide stream of seller-built websites. */
 .broadcast-bar {
   position: relative;
