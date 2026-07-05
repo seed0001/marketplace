@@ -27,6 +27,10 @@ model User {
   websites      SellerWebsite[]
   role          UserRole       @default(MEMBER)
   analyticsEvents AnalyticsEvent[]
+  sellerAiState    SellerAiState?
+  sellerAiThreads  SellerAiThread[]
+  sellerMemories   SellerMemory[]
+  aiSettingsUpdated AiProviderSettings[] @relation("AiSettingsUpdatedBy")
 }
 
 enum UserRole {
@@ -223,4 +227,70 @@ model AnalyticsEvent {
   @@index([listingId, occurredAt])
   @@index([userId, occurredAt])
   @@index([sessionId])
+}
+
+model SellerAiState {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  lastVisitedAt  DateTime?
+  lastBriefingAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SellerAiThread {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @default("Seller copilot")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SellerAiMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model SellerAiMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  role      String
+  content   String
+  model     String?
+  createdAt DateTime @default(now())
+
+  thread SellerAiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model SellerMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  content   String
+  source    String   @default("conversation")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, content])
+  @@index([userId, updatedAt])
+}
+
+model AiProviderSettings {
+  id              String   @id @default("default")
+  provider        String   @default("openrouter")
+  model           String   @default("openrouter/auto")
+  encryptedApiKey String?
+  keyIv           String?
+  keyTag          String?
+  updatedById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  updatedBy User? @relation("AiSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 }

@@ -30,6 +30,9 @@ export function Navbar() {
               >
                 + Sell
               </Link>
+              <Link href="/seller/studio" className="text-sm font-medium text-violet-300 hover:text-violet-200 transition-colors">
+                Seller AI
+              </Link>
               <Link href="/messages" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
                 Messages
               </Link>
@@ -104,6 +107,9 @@ export function Navbar() {
             <>
               <Link href="/listings/new" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 + Sell
+              </Link>
+              <Link href="/seller/studio" className="block py-1 text-sm text-violet-300" onClick={() => setMenuOpen(false)}>
+                Seller AI
               </Link>
               <Link href="/messages" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Messages

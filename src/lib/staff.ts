@@ -15,3 +15,9 @@ export async function requireStaff() {
   if (!user || !["STAFF", "ADMIN"].includes(user.role)) redirect("/");
   return user;
 }
+
+export async function requireAdministrator() {
+  const user = await requireStaff();
+  if (user.role !== "ADMIN") redirect("/staff/analytics");
+  return user;
+}

@@ -135,3 +135,17 @@ administrator on successful sign-in.
 
 The production container accepts request headers up to 64 KB so Auth.js can
 receive and replace stale chunked session cookies instead of returning HTTP 431.
+
+## Seller AI Studio
+
+Signed-in sellers can open `/seller/studio` for a persistent AI business
+partner with listing performance, buyer conversations, marketplace context,
+return briefings, conversation history, and durable seller memory. Configure
+`OPENROUTER_API_KEY` in the server environment. `OPENROUTER_MODEL` is optional
+and defaults to `openrouter/auto`. The AI only drafts and advises; it never
+publishes listings or sends customer messages without seller approval.
+
+Administrators can also configure and verify the OpenRouter key and model at
+`/staff/ai-settings`. Dashboard-supplied keys are AES-256-GCM encrypted in the
+database using `AI_SETTINGS_ENCRYPTION_KEY`, falling back to `AUTH_SECRET`.
+Environment-based OpenRouter settings remain available as a deployment fallback.
