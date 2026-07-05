@@ -16,7 +16,7 @@ type MemoryCandidate = { kind?: unknown; content?: unknown };
 type OpenRouterMessage = { role: "system" | "user" | "assistant"; content: string };
 type OpenRouterResult = {
   model?: string;
-  choices?: { message?: { content?: string } }[];
+  choices?: { finish_reason?: string; message?: { content?: string } }[];
 };
 
 export function isClassifierOnlyResponse(content: string) {
@@ -124,8 +124,10 @@ export async function POST(request: NextRequest) {
     ];
     let result: OpenRouterResult | null = null;
     let rawReply = "";
+    let completeReply = "";
+    let classifierRetries = 0;
 
-    for (let attempt = 0; attempt <= MAX_CLASSIFIER_RETRIES; attempt += 1) {
+    while (true) {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -138,7 +140,6 @@ export async function POST(request: NextRequest) {
           model,
           messages: providerMessages,
           temperature: 0.7,
-          max_tokens: 1400,
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -151,19 +152,36 @@ export async function POST(request: NextRequest) {
 
       result = await response.json() as OpenRouterResult;
       rawReply = result.choices?.[0]?.message?.content || "";
-      if (!isClassifierOnlyResponse(rawReply)) break;
+      if (isClassifierOnlyResponse(rawReply)) {
+        if (classifierRetries >= MAX_CLASSIFIER_RETRIES) break;
+        classifierRetries += 1;
+        console.warn(`OpenRouter returned classifier-only output; retrying seller response (${classifierRetries})`);
+        providerMessages.push(
+          { role: "assistant", content: rawReply },
+          {
+            role: "user",
+            content:
+              "That was only an internal safety-classifier label, not a response to my request. Do not repeat or discuss the classifier result. Continue the original conversation now and give the complete, useful seller-business answer I asked for.",
+          },
+        );
+        continue;
+      }
 
-      console.warn(`OpenRouter returned classifier-only output; retrying seller response (${attempt + 1})`);
+      completeReply += rawReply;
+      if (result.choices?.[0]?.finish_reason !== "length") break;
+
+      console.warn("OpenRouter stopped the seller response for length; requesting continuation");
       providerMessages.push(
         { role: "assistant", content: rawReply },
         {
           role: "user",
           content:
-            "That was only an internal safety-classifier label, not a response to my request. Do not repeat or discuss the classifier result. Continue the original conversation now and give the complete, useful seller-business answer I asked for.",
+            "Continue from the exact point where the response stopped. Do not restart, repeat earlier text, summarize, or add a new introduction. Finish the answer and include the required memory comment only at the true end.",
         },
       );
     }
 
+    rawReply = completeReply || rawReply;
     if (typeof rawReply !== "string" || !rawReply.trim()) {
       return NextResponse.json({ error: "The AI returned an empty response." }, { status: 502 });
     }
