@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { CATEGORIES, OTHER_CATEGORY } from "@/lib/categories";
 
 export default function EditListingPage(props: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
   const [id, setId] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [readme, setReadme] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [form, setForm] = useState({
     title: "",
     price: "",
@@ -30,10 +32,16 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
     fetch(`/api/listings/${id}`)
       .then((r) => r.json())
       .then((data) => {
+        const savedCategory: string = data.category || "";
+        // A stored category that isn't one of the presets is a custom value:
+        // select "Other…" and seed the free-form field with it.
+        const isCustom =
+          savedCategory !== "" && !CATEGORIES.includes(savedCategory as (typeof CATEGORIES)[number]);
+        if (isCustom) setCustomCategory(savedCategory);
         setForm({
           title: data.title,
           price: data.price.toString(),
-          category: data.category || "",
+          category: isCustom ? OTHER_CATEGORY : savedCategory,
           adult: data.adult ?? false,
         });
         setImages(Array.isArray(data.images) ? data.images : []);
@@ -62,7 +70,8 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
       body: JSON.stringify({
         title: form.title,
         price: parseFloat(form.price),
-        category: form.category,
+        category:
+          (form.category === OTHER_CATEGORY ? customCategory.trim() : form.category) || null,
         images,
         readme,
         adult: form.adult,
@@ -149,13 +158,21 @@ export default function EditListingPage(props: { params: Promise<{ id: string }>
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
-            <option value="Web app">Web app</option>
-            <option value="Mobile app">Mobile app</option>
-            <option value="AI agent">AI agent</option>
-            <option value="Automation">Automation</option>
-            <option value="Prompt/template">Prompt/template</option>
-            <option value="Component">Component</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+            <option value={OTHER_CATEGORY}>Other…</option>
           </select>
+          {form.category === OTHER_CATEGORY && (
+            <input
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              placeholder="Enter a custom category"
+              className="mt-2 w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+            />
+          )}
         </div>
 
         <div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { CATEGORIES, OTHER_CATEGORY } from "@/lib/categories";
 
 export default function NewListing() {
   const router = useRouter();
@@ -12,6 +13,8 @@ export default function NewListing() {
   const [error, setError] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [readme, setReadme] = useState("");
+  const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
 
   if (!session) {
     return (
@@ -35,7 +38,7 @@ export default function NewListing() {
         title: form.get("title"),
         price: parseFloat(form.get("price") as string),
         images,
-        category: form.get("category"),
+        category: (category === OTHER_CATEGORY ? customCategory.trim() : category) || null,
         readme,
         adult: form.get("adult") === "on",
       }),
@@ -105,16 +108,26 @@ export default function NewListing() {
           <label className="block text-sm font-medium mb-1">Type</label>
           <select
             name="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
           >
             <option value="">Select...</option>
-            <option value="Web app">Web app</option>
-            <option value="Mobile app">Mobile app</option>
-            <option value="AI agent">AI agent</option>
-            <option value="Automation">Automation</option>
-            <option value="Prompt/template">Prompt/template</option>
-            <option value="Component">Component</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+            <option value={OTHER_CATEGORY}>Other…</option>
           </select>
+          {category === OTHER_CATEGORY && (
+            <input
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              placeholder="Enter a custom category"
+              className="mt-2 w-full rounded-lg border px-4 py-2 text-sm outline-none focus:border-emerald-500"
+            />
+          )}
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
