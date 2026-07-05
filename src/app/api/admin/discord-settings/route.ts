@@ -54,7 +54,7 @@ export async function GET() {
   });
 }
 
-export async function PUT(request: NextRequest) {
+async function updateDiscordSettings(request: NextRequest) {
   const admin = await administrator();
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const parsed = settingsSchema.safeParse(await request.json());
@@ -112,13 +112,32 @@ export async function PUT(request: NextRequest) {
         })(),
       },
     }),
-    ...input.channels.map((channel) => prisma.discordChannelConfig.update({
+    ...input.channels.map((channel) => {
+      const defaults = DISCORD_CHANNEL_DEFAULTS.find((item) => item.eventType === channel.eventType)!;
+      return prisma.discordChannelConfig.upsert({
       where: { eventType: channel.eventType },
-      data: {
+      update: {
         channelId: channel.channelId || null, channelName: channel.channelName || null,
         mentionRoleId: channel.mentionRoleId || null, systemPrompt: channel.systemPrompt, enabled: channel.enabled,
       },
-    })),
+      create: {
+        eventType: channel.eventType, label: defaults.label,
+        channelId: channel.channelId || null, channelName: channel.channelName || null,
+        mentionRoleId: channel.mentionRoleId || null, systemPrompt: channel.systemPrompt, enabled: channel.enabled,
+      },
+    });
+    }),
   ]);
   return NextResponse.json({ ok: true });
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    return await updateDiscordSettings(request);
+  } catch (error) {
+    console.error("Discord settings update failed", error);
+    return NextResponse.json({
+      error: error instanceof Error ? `Discord configuration could not be saved: ${error.message}` : "Discord configuration could not be saved.",
+    }, { status: 500 });
+  }
 }

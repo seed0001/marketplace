@@ -47,6 +47,18 @@ export function DiscordManagementForm({
   const [retrying, setRetrying] = useState<string | null>(null);
   const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
+  async function responseData(response: Response) {
+    const text = await response.text();
+    if (!text) {
+      throw new Error(`The server returned an empty response (${response.status}). Check the Railway deployment logs.`);
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`The server returned an invalid response (${response.status}): ${text.slice(0, 180)}`);
+    }
+  }
+
   function updateChannel(eventType: string, patch: Partial<Channel>) {
     setChannels((items) => items.map((item) => item.eventType === eventType ? { ...item, ...patch } : item));
   }
@@ -71,7 +83,7 @@ export function DiscordManagementForm({
           })),
         }),
       });
-      const data = await response.json();
+      const data = await responseData(response);
       if (!response.ok) throw new Error(data.error || "Could not save Discord configuration.");
       setSettings((value) => ({
         ...value,
@@ -97,7 +109,7 @@ export function DiscordManagementForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ eventType }),
       });
-      const data = await response.json();
+      const data = await responseData(response);
       if (!response.ok) throw new Error(data.error || "Test delivery failed.");
       setMessage({ kind: "success", text: `Test delivered successfully. Discord message ${data.messageId}.` });
     } catch (error) {
@@ -116,7 +128,7 @@ export function DiscordManagementForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deliveryId }),
       });
-      const data = await response.json();
+      const data = await responseData(response);
       if (!response.ok) throw new Error(data.error || "Retry failed.");
       setMessage({ kind: "success", text: "Discord delivery retry succeeded." });
     } catch (error) {
