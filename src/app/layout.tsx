@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { WebsiteBroadcast } from "@/components/WebsiteBroadcast";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { SpotifyRadio } from "@/components/SpotifyRadio";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +56,7 @@ export default function RootLayout({
         <ParticleBackground />
         <Providers>
           <AnalyticsTracker />
+          <SpotifyRadio />
           <div className="relative z-10 flex flex-col min-h-full">
             <Navbar />
             <WebsiteBroadcast />

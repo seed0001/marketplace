@@ -31,6 +31,7 @@ model User {
   sellerAiThreads  SellerAiThread[]
   sellerMemories   SellerMemory[]
   aiSettingsUpdated AiProviderSettings[] @relation("AiSettingsUpdatedBy")
+  audioSettingsUpdated SiteAudioSettings[] @relation("AudioSettingsUpdatedBy")
 }
 
 enum UserRole {
@@ -293,4 +294,16 @@ model AiProviderSettings {
   updatedAt       DateTime @updatedAt
 
   updatedBy User? @relation("AiSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model SiteAudioSettings {
+  id          String   @id @default("default")
+  enabled     Boolean  @default(false)
+  label       String   @default("Builder Radio")
+  spotifyUrl  String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  updatedBy User? @relation("AudioSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 }
