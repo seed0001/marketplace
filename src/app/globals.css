@@ -31,3 +31,28 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/*
+ * Form controls default to the browser's light styling (white background,
+ * dark text), which is unreadable on the dark theme — most visibly the native
+ * <select> dropdown popup. Give them the surface/foreground colors so their
+ * text and, crucially, the <option> list stay legible.
+ */
+input,
+select,
+textarea {
+  background-color: var(--surface);
+  color: var(--foreground);
+  border-color: var(--border);
+  color-scheme: dark;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+select option {
+  background-color: var(--surface);
+  color: var(--foreground);
+}
