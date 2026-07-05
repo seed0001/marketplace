@@ -11,7 +11,14 @@ import { prisma } from "@/lib/prisma";
 export async function getPortfolio(userId: string, includePrivate = false) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, image: true, email: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      email: true,
+      createdAt: true,
+      websites: { orderBy: { createdAt: "asc" } },
+    },
   });
   if (!user) return null;
 

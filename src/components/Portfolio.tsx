@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { WebsiteShowcaseEditor } from "@/components/WebsiteShowcaseEditor";
 import type { Portfolio as PortfolioData } from "@/lib/portfolio";
 import { formatPrice, formatDate, formatRelativeTime } from "@/lib/utils";
 
@@ -79,6 +80,37 @@ export function Portfolio({
           </p>
         </div>
       </div>
+
+      {/* Seller websites */}
+      <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        {isOwner ? (
+          <WebsiteShowcaseEditor initialWebsites={user.websites} />
+        ) : (
+          <>
+            <h2 className="text-lg font-semibold">Websites by {user.name || "this maker"}</h2>
+            {user.websites.length === 0 ? (
+              <p className="mt-2 text-sm text-zinc-500">No websites showcased yet.</p>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {user.websites.map((website) => (
+                  <a
+                    key={website.id}
+                    href={website.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group rounded-xl border border-border bg-zinc-950/40 p-4 hover:border-emerald-500/50"
+                  >
+                    <div className="font-semibold group-hover:text-emerald-400">
+                      {website.title} ↗
+                    </div>
+                    <p className="mt-1 text-sm text-zinc-500">{website.description}</p>
+                  </a>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </section>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-12">
