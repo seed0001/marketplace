@@ -137,13 +137,13 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
       </button>
 
       {conv && (
-        <p className="text-sm text-zinc-500 mb-4">
-          Conversation with <span className="font-medium text-zinc-700">{otherPerson?.name || "User"}</span> about{" "}
-          <span className="font-medium text-zinc-700">{conv.listing.title}</span>
+        <p className="text-sm text-zinc-400 mb-4">
+          Conversation with <span className="font-medium text-zinc-200">{otherPerson?.name || "User"}</span> about{" "}
+          <span className="font-medium text-zinc-200">{conv.listing.title}</span>
         </p>
       )}
 
-      <div className="rounded-xl border bg-white">
+      <div className="rounded-xl border border-border bg-surface">
         <div className="h-[50vh] overflow-y-auto p-4 space-y-3">
           {messages.map((msg) => {
             const isMe = msg.senderId === session.user!.id;
@@ -151,7 +151,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                    isMe ? "bg-emerald-600 text-white" : "bg-zinc-100"
+                    isMe ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-100"
                   }`}
                 >
                   <p className="text-sm">{msg.content}</p>
@@ -165,7 +165,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t p-4 flex gap-2">
+        <div className="border-t border-border p-4 flex gap-2">
           <input
             value={newMsg}
             onChange={(e) => setNewMsg(e.target.value)}
@@ -185,7 +185,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
 
       {/* Feedback */}
       {conv && (
-        <div className="mt-8 rounded-xl border bg-white p-5">
+        <div className="mt-8 rounded-xl border border-border bg-surface p-5">
           <h3 className="text-sm font-semibold mb-3">Leave feedback</h3>
           {myFeedback ? (
             <div className="text-sm text-zinc-400">
@@ -201,7 +201,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
                     key={star}
                     type="button"
                     onClick={() => setFeedbackRating(star)}
-                    className={`text-xl ${star <= feedbackRating ? "text-amber-500" : "text-zinc-200"} hover:text-amber-400 transition`}
+                    className={`text-xl ${star <= feedbackRating ? "text-amber-500" : "text-zinc-600"} hover:text-amber-400 transition`}
                   >
                     ★
                   </button>

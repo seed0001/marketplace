@@ -32,7 +32,7 @@ export default function MessagesPage() {
   if (!session) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">
-        <p className="text-zinc-600">Sign in to view your messages.</p>
+        <p className="text-zinc-400">Sign in to view your messages.</p>
       </div>
     );
   }
@@ -53,10 +53,10 @@ export default function MessagesPage() {
               <Link
                 key={conv.id}
                 href={`/messages/${conv.id}`}
-                className="block rounded-xl border bg-white p-4 hover:bg-zinc-50 transition"
+                className="block rounded-xl border border-border bg-surface p-4 hover:bg-zinc-800 transition"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-sm font-semibold">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-sm font-semibold text-zinc-100">
                     {other.name?.[0]?.toUpperCase() || "U"}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -72,7 +72,7 @@ export default function MessagesPage() {
                       Re: {conv.listing.title} – {formatPrice(conv.listing.price)}
                     </p>
                     {lastMsg && (
-                      <p className="text-sm text-zinc-600 truncate mt-1">{lastMsg.content}</p>
+                      <p className="text-sm text-zinc-300 truncate mt-1">{lastMsg.content}</p>
                     )}
                   </div>
                 </div>
