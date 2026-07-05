@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
+import { queueDiscordEvent } from "@/lib/discord";
 
 const idSchema = z.string().cuid();
 const statusSchema = z.enum(["active", "hidden", "sold"]);
@@ -30,6 +31,11 @@ export async function setListingStatus(listingId: string, status: string) {
       },
     }),
   ]);
+  await queueDiscordEvent("moderation", `Listing status changed · ${listing.title}`, {
+    description: `${staff.name || staff.email} changed a listing from ${listing.status} to ${parsedStatus}.`,
+    color: 0xa78bfa,
+    fields: [{ name: "Listing ID", value: parsedId }],
+  });
   revalidatePath("/staff/content");
   revalidatePath("/listings");
   revalidatePath(`/listings/${parsedId}`);
@@ -40,6 +46,7 @@ type ContentType = "listing" | "website" | "review" | "feedback";
 export async function deleteContent(contentType: ContentType, contentId: string) {
   const staff = await requireStaff();
   const parsedId = idSchema.parse(contentId);
+  let deletedTitle: string | null = null;
 
   await prisma.$transaction(async (tx) => {
     let title: string | null = null;
@@ -69,6 +76,7 @@ export async function deleteContent(contentType: ContentType, contentId: string)
     }
 
     if (!title) return;
+    deletedTitle = title;
     await tx.contentModerationEvent.create({
       data: {
         actorId: staff.id,
@@ -79,6 +87,13 @@ export async function deleteContent(contentType: ContentType, contentId: string)
       },
     });
   });
+  if (deletedTitle) {
+    await queueDiscordEvent("moderation", `${contentType} deleted`, {
+      description: `${staff.name || staff.email} deleted ${deletedTitle}.`,
+      color: 0xef4444,
+      fields: [{ name: "Deleted record ID", value: parsedId }],
+    });
+  }
 
   revalidatePath("/staff/content");
   revalidatePath("/listings");

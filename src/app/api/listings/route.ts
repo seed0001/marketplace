@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { sanitizeImages } from "@/lib/utils";
 import { auth } from "@/lib/auth";
+import { queueDiscordEvent } from "@/lib/discord";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -76,6 +77,15 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
       },
       include: { user: { select: { id: true, name: true, image: true } } },
+    });
+    await queueDiscordEvent("marketplace", `New listing · ${listing.title}`, {
+      description: listing.description || "A new marketplace listing was published.",
+      color: 0x34d399,
+      fields: [
+        { name: "Seller", value: listing.user.name || "Marketplace member", inline: true },
+        { name: "Price", value: `$${listing.price.toLocaleString()}`, inline: true },
+        { name: "Category", value: listing.category || "Uncategorized", inline: true },
+      ],
     });
 
     return NextResponse.json(listing, { status: 201 });

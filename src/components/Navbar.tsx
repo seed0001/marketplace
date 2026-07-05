@@ -51,6 +51,7 @@ export function Navbar() {
                       <>
                         <Link href="/staff/content" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Manage content</Link>
                         <Link href="/staff/issues" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Issue reports</Link>
+                        {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block px-4 py-2 text-sm text-indigo-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Discord control</Link>}
                         <Link href="/staff/analytics" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Intelligence</Link>
                       </>
                     )}
@@ -119,6 +120,7 @@ export function Navbar() {
                 <>
                   <Link href="/staff/content" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Manage content</Link>
                   <Link href="/staff/issues" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Issue reports</Link>
+                  {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block py-1 text-sm text-indigo-300" onClick={() => setMenuOpen(false)}>Discord control</Link>}
                   <Link href="/staff/analytics" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Intelligence</Link>
                 </>
               )}

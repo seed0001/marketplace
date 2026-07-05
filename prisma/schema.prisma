@@ -35,6 +35,62 @@ model User {
   ttsSettingsUpdated   TtsProviderSettings[] @relation("TtsSettingsUpdatedBy")
   moderationEvents     ContentModerationEvent[] @relation("ModerationActor")
   issueReports         SiteIssueReport[] @relation("IssueReporter")
+  discordSettingsUpdated DiscordBotSettings[] @relation("DiscordSettingsUpdatedBy")
+}
+
+model DiscordBotSettings {
+  id                    String   @id @default("default")
+  enabled               Boolean  @default(false)
+  guildId               String?
+  applicationId         String?
+  encryptedBotToken     String?
+  botTokenIv            String?
+  botTokenTag           String?
+  openRouterModel       String   @default("openrouter/auto")
+  encryptedOpenRouterKey String?
+  openRouterKeyIv       String?
+  openRouterKeyTag      String?
+  updatedById           String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  updatedBy User? @relation("DiscordSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model DiscordChannelConfig {
+  id           String   @id @default(cuid())
+  eventType    String   @unique
+  label        String
+  channelId    String?
+  channelName  String?
+  systemPrompt String
+  enabled      Boolean  @default(false)
+  mentionRoleId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  deliveries DiscordDelivery[]
+}
+
+model DiscordDelivery {
+  id               String   @id @default(cuid())
+  eventType        String
+  title            String
+  payload          Json
+  status           String   @default("pending")
+  attempts         Int      @default(0)
+  lastError        String?
+  discordMessageId String?
+  channelConfigId  String?
+  createdAt        DateTime @default(now())
+  deliveredAt      DateTime?
+  updatedAt        DateTime @updatedAt
+
+  channelConfig DiscordChannelConfig? @relation(fields: [channelConfigId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([eventType, createdAt])
+  @@index([channelConfigId])
 }
 
 model SiteIssueReport {

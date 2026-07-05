@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
+import { queueDiscordEvent } from "@/lib/discord";
 import { prisma } from "@/lib/prisma";
 
 export type IssueFormState = {
@@ -49,6 +50,15 @@ export async function submitIssue(
       userAgent: requestHeaders.get("user-agent")?.slice(0, 1000) || null,
     },
     select: { id: true },
+  });
+  await queueDiscordEvent("site_issues", `New site issue · VM-${report.id.slice(-8).toUpperCase()}`, {
+    description: parsed.data.description,
+    color: 0xf59e0b,
+    fields: [
+      { name: "Affected page or feature", value: parsed.data.affectedPage },
+      { name: "Contact", value: parsed.data.contact },
+      { name: "Status", value: "Open", inline: true },
+    ],
   });
 
   return {
