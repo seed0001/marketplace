@@ -4,7 +4,7 @@ export function GallerySection({ content }: { content: string[] }) {
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {content.map((src, i) => (
         <div key={i} className="aspect-square rounded-lg bg-zinc-100 overflow-hidden">
-          <img src={src} alt="" className="h-full w-full object-cover" />
+          <img src={src} alt="" className="h-full w-full object-contain" />
         </div>
       ))}
     </div>

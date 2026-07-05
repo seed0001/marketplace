@@ -135,7 +135,7 @@ export function ImageUpload({
           {value.map((src, i) => (
             <div key={i} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-zinc-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+              <img src={src} alt={`Photo ${i + 1}`} className="h-full w-full object-contain" />
               <button
                 type="button"
                 onClick={(e) => {
