@@ -58,6 +58,11 @@ export function Footer() {
                   Messages
                 </Link>
               </li>
+              <li>
+                <Link href="/report-issue" className="text-zinc-400 hover:text-emerald-500 transition-colors">
+                  Report a site issue
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -34,6 +34,24 @@ model User {
   audioSettingsUpdated SiteAudioSettings[] @relation("AudioSettingsUpdatedBy")
   ttsSettingsUpdated   TtsProviderSettings[] @relation("TtsSettingsUpdatedBy")
   moderationEvents     ContentModerationEvent[] @relation("ModerationActor")
+  issueReports         SiteIssueReport[] @relation("IssueReporter")
+}
+
+model SiteIssueReport {
+  id           String   @id @default(cuid())
+  affectedPage String
+  description  String
+  contact      String
+  status       String   @default("open")
+  userAgent    String?
+  reporterId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reporter User? @relation("IssueReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([reporterId])
 }
 
 model ContentModerationEvent {
