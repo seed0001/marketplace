@@ -32,6 +32,7 @@ model User {
   sellerMemories   SellerMemory[]
   aiSettingsUpdated AiProviderSettings[] @relation("AiSettingsUpdatedBy")
   audioSettingsUpdated SiteAudioSettings[] @relation("AudioSettingsUpdatedBy")
+  ttsSettingsUpdated   TtsProviderSettings[] @relation("TtsSettingsUpdatedBy")
 }
 
 enum UserRole {
@@ -306,4 +307,22 @@ model SiteAudioSettings {
   updatedAt   DateTime @updatedAt
 
   updatedBy User? @relation("AudioSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model TtsProviderSettings {
+  id                      String   @id @default("default")
+  provider                String   @default("fish_audio")
+  model                   String   @default("s2.1-pro-free")
+  referenceId             String?
+  encryptedApiKey         String?
+  keyIv                   String?
+  keyTag                  String?
+  ownerBriefingsEnabled   Boolean  @default(true)
+  sellerBriefingsEnabled  Boolean  @default(false)
+  scheduleEnabled         Boolean  @default(false)
+  updatedById             String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  updatedBy User? @relation("TtsSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 }

@@ -123,6 +123,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
           <div className="flex items-center gap-4 text-xs text-zinc-500">
             <span className="hidden sm:inline">Signed in as {staff.name || staff.email}</span>
             {staff.role === "ADMIN" && <Link href="/staff/ai-settings" className="rounded-lg border border-violet-400/20 px-3 py-2 text-violet-300 hover:bg-violet-400/5">AI setup</Link>}
+            {staff.role === "ADMIN" && <Link href="/staff/briefings" className="rounded-lg border border-sky-400/20 px-3 py-2 text-sky-300 hover:bg-sky-400/5">Spoken briefings</Link>}
             {staff.role === "ADMIN" && <Link href="/staff/audio-settings" className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">Builder Radio</Link>}
             <Link href="/staff/analytics" className="rounded-lg border border-white/10 px-3 py-2 text-zinc-300 hover:bg-white/5">Refresh</Link>
           </div>
