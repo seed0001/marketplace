@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
+const OWNER_EMAIL = "travisbollenbach@gmail.com";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -22,7 +24,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name, image: user.image };
+        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((email) => email.trim().toLowerCase());
+        const staffEmails = (process.env.STAFF_EMAILS || "").split(",").map((email) => email.trim().toLowerCase());
+        const normalizedEmail = user.email.toLowerCase();
+        const configuredRole = normalizedEmail === OWNER_EMAIL || adminEmails.includes(normalizedEmail)
+          ? "ADMIN"
+          : staffEmails.includes(normalizedEmail)
+            ? "STAFF"
+            : user.role;
+        if (configuredRole !== user.role) {
+          await prisma.user.update({ where: { id: user.id }, data: { role: configuredRole } });
+        }
+
+        return { id: user.id, email: user.email, name: user.name, image: user.image, role: configuredRole };
       },
     }),
   ],
@@ -33,12 +47,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.role = token.role as "MEMBER" | "STAFF" | "ADMIN";
       }
       return session;
     },

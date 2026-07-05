@@ -44,6 +44,15 @@ export function Navbar() {
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
+                    {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
+                      <Link
+                        href="/staff/analytics"
+                        className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Intelligence
+                      </Link>
+                    )}
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
@@ -102,6 +111,11 @@ export function Navbar() {
               <Link href="/profile" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Profile
               </Link>
+              {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
+                <Link href="/staff/analytics" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>
+                  Intelligence
+                </Link>
+              )}
               <button onClick={() => signOut()} className="block py-1 text-sm text-red-400">
                 Sign out
               </button>

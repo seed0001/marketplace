@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { WebsiteBroadcast } from "@/components/WebsiteBroadcast";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-950">
         <ParticleBackground />
         <Providers>
+          <AnalyticsTracker />
           <div className="relative z-10 flex flex-col min-h-full">
             <Navbar />
             <WebsiteBroadcast />

@@ -122,3 +122,13 @@ The app is configured for [Railway](https://railway.app) via `railway.json`
 and the included `Dockerfile` (Node 22). Set `DATABASE_URL` and `AUTH_SECRET`
 in your Railway project's environment variables. The `start` script runs
 `prisma db push` before booting, so the schema is synced on each deploy.
+# Staff analytics
+
+The private marketplace intelligence dashboard lives at `/staff/analytics`.
+Set `ADMIN_EMAILS` or `STAFF_EMAILS` in the environment to a comma-separated
+list of existing account emails, then sign in again. The matching database role
+is promoted at login. The dashboard tracks first-party page views, meaningful
+clicks, anonymous and registered visitors, sessions, acquisition, listing
+demand, sellers, inquiries, and messaging. Raw IP addresses are not stored.
+The platform owner account (`travisbollenbach@gmail.com`) is always promoted to
+administrator on successful sign-in.

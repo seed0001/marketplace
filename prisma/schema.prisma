@@ -25,6 +25,14 @@ model User {
   feedbackReceived Feedback[]   @relation("FeedbackTo")
   listingViews  ListingView[]  @relation("ViewerViews")
   websites      SellerWebsite[]
+  role          UserRole       @default(MEMBER)
+  analyticsEvents AnalyticsEvent[]
+}
+
+enum UserRole {
+  MEMBER
+  STAFF
+  ADMIN
 }
 
 model SellerWebsite {
@@ -149,4 +157,70 @@ model Feedback {
   @@unique([listingId, fromUserId])
   @@index([toUserId])
   @@index([fromUserId])
+}
+
+// First-party, privacy-conscious site analytics. A visitor is a browser, a
+// session is a visit, and events describe page views and meaningful clicks.
+model AnalyticsVisitor {
+  id          String   @id @default(cuid())
+  visitorKey  String   @unique
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  sessions    AnalyticsSession[]
+  events      AnalyticsEvent[]
+
+  @@index([lastSeenAt])
+}
+
+model AnalyticsSession {
+  id          String   @id @default(cuid())
+  sessionKey  String   @unique
+  visitorId   String
+  startedAt   DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  entryPath   String
+  exitPath    String?
+  referrer    String?
+  source      String?
+  medium      String?
+  campaign    String?
+  deviceType  String?
+  browser     String?
+  country     String?
+  region      String?
+  networkHash String?
+
+  visitor AnalyticsVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  events  AnalyticsEvent[]
+
+  @@index([visitorId])
+  @@index([startedAt])
+  @@index([source])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  type       String
+  path       String
+  title      String?
+  element    String?
+  label      String?
+  href       String?
+  listingId  String?
+  visitorId  String
+  sessionId  String
+  userId     String?
+  occurredAt DateTime @default(now())
+  metadata   Json?
+
+  visitor AnalyticsVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  session AnalyticsSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([occurredAt])
+  @@index([type, occurredAt])
+  @@index([path, occurredAt])
+  @@index([listingId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([sessionId])
 }
