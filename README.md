@@ -132,3 +132,6 @@ clicks, anonymous and registered visitors, sessions, acquisition, listing
 demand, sellers, inquiries, and messaging. Raw IP addresses are not stored.
 The platform owner account (`travisbollenbach@gmail.com`) is always promoted to
 administrator on successful sign-in.
+
+The production container accepts request headers up to 64 KB so Auth.js can
+receive and replace stale chunked session cookies instead of returning HTTP 431.
