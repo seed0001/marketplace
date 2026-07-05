@@ -23,6 +23,7 @@ model User {
   reviewsGiven Review[]        @relation("ReviewAuthor")
   feedbackGiven   Feedback[]    @relation("FeedbackFrom")
   feedbackReceived Feedback[]   @relation("FeedbackTo")
+  listingViews  ListingView[]  @relation("ViewerViews")
 }
 
 model Listing {
@@ -43,6 +44,7 @@ model Listing {
   conversations Conversation[]
   reviews      Review[]
   feedback     Feedback[]
+  views        ListingView[]
   sections     Json?
   readme       String?
 
@@ -50,6 +52,23 @@ model Listing {
   @@index([status])
   @@index([category])
   @@index([title])
+}
+
+// A single view of a listing's detail page. viewerId is null for signed-out
+// visitors; the listing owner's own views are never recorded. Powers the
+// seller's private analytics ("who's looking at your stuff").
+model ListingView {
+  id        String   @id @default(cuid())
+  listingId String
+  viewerId  String?
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  viewer  User?   @relation("ViewerViews", fields: [viewerId], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@index([viewerId])
+  @@index([createdAt])
 }
 
 model Conversation {

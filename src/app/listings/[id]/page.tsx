@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { ListingActions } from "./ListingActions";
 import { auth } from "@/lib/auth";
 import { SectionRenderer } from "@/components/listing-sections/SectionRenderer";
+import { ViewTracker } from "@/components/ViewTracker";
 import { parseReadme } from "@/lib/listing-sections";
 import type { Section } from "@/lib/listing-sections";
 
@@ -39,6 +41,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <ViewTracker listingId={listing.id} />
       {/* Hero */}
       <div className="grid gap-8 sm:grid-cols-2 mb-12">
         <div className="aspect-[4/3] rounded-2xl bg-zinc-100 overflow-hidden">
@@ -75,24 +78,36 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             <p className="text-zinc-600 leading-relaxed">{listing.description}</p>
           )}
 
-          <div className="flex items-center gap-3 text-sm text-zinc-500 pt-2 border-t">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-200 text-sm font-semibold">
-              {listing.user.name?.[0]?.toUpperCase() || "U"}
-            </div>
+          <Link
+            href={`/users/${listing.user.id}`}
+            className="flex items-center gap-3 text-sm text-zinc-400 pt-2 border-t border-border hover:text-zinc-200 transition-colors"
+          >
+            {listing.user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={listing.user.image}
+                alt={listing.user.name || "Seller"}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-700 text-sm font-semibold text-zinc-100">
+                {listing.user.name?.[0]?.toUpperCase() || "U"}
+              </div>
+            )}
             <div>
-              <p className="font-medium text-zinc-700">{listing.user.name || "Anonymous"}</p>
+              <p className="font-medium text-zinc-200">{listing.user.name || "Anonymous"}</p>
               <div className="flex items-center gap-1.5 text-xs">
                 <span>{formatDate(listing.createdAt)}</span>
                 {sellerFeedback._count > 0 && (
                   <>
                     <span>·</span>
                     <span className="text-amber-500">{'★'.repeat(Math.round(sellerFeedback._avg.rating ?? 0))}</span>
-                    <span className="text-zinc-400">({sellerFeedback._count})</span>
+                    <span className="text-zinc-500">({sellerFeedback._count})</span>
                   </>
                 )}
               </div>
             </div>
-          </div>
+          </Link>
 
           <ListingActions listingId={listing.id} sellerId={listing.userId} isOwner={isOwner} />
         </div>
