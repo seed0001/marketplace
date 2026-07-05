@@ -33,6 +33,23 @@ model User {
   aiSettingsUpdated AiProviderSettings[] @relation("AiSettingsUpdatedBy")
   audioSettingsUpdated SiteAudioSettings[] @relation("AudioSettingsUpdatedBy")
   ttsSettingsUpdated   TtsProviderSettings[] @relation("TtsSettingsUpdatedBy")
+  moderationEvents     ContentModerationEvent[] @relation("ModerationActor")
+}
+
+model ContentModerationEvent {
+  id          String   @id @default(cuid())
+  actorId     String
+  action      String
+  contentType String
+  contentId   String
+  contentTitle String
+  createdAt   DateTime @default(now())
+
+  actor User @relation("ModerationActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([actorId])
+  @@index([createdAt])
+  @@index([contentType, contentId])
 }
 
 enum UserRole {

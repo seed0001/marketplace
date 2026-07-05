@@ -48,13 +48,10 @@ export function Navbar() {
                 {menuOpen && (
                   <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
                     {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
-                      <Link
-                        href="/staff/analytics"
-                        className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Intelligence
-                      </Link>
+                      <>
+                        <Link href="/staff/content" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Manage content</Link>
+                        <Link href="/staff/analytics" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Intelligence</Link>
+                      </>
                     )}
                     <Link
                       href="/profile"
@@ -118,9 +115,10 @@ export function Navbar() {
                 Profile
               </Link>
               {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
-                <Link href="/staff/analytics" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>
-                  Intelligence
-                </Link>
+                <>
+                  <Link href="/staff/content" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Manage content</Link>
+                  <Link href="/staff/analytics" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Intelligence</Link>
+                </>
               )}
               <button onClick={() => signOut()} className="block py-1 text-sm text-red-400">
                 Sign out
