@@ -5,7 +5,7 @@ export function RichTextSection({ content }: { content: string }) {
   const html = marked.parse(content, { async: false }) as string;
   return (
     <div
-      className="prose prose-zinc max-w-none text-sm leading-relaxed"
+      className="prose prose-invert max-w-none text-sm leading-relaxed"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
