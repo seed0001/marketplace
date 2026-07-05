@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
       status: "active",
       OR: [
         { title: { contains: q, mode: "insensitive" } },
+        { readme: { contains: q, mode: "insensitive" } },
         { description: { contains: q, mode: "insensitive" } },
       ],
     },

@@ -74,7 +74,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </span>
           )}
 
-          {!hasContent && (
+          {!hasContent && listing.description.trim() && (
             <p className="text-zinc-600 leading-relaxed">{listing.description}</p>
           )}
 

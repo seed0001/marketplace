@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
   if (query) {
     where.OR = [
       { title: { contains: query, mode: "insensitive" } },
+      { readme: { contains: query, mode: "insensitive" } },
       { description: { contains: query, mode: "insensitive" } },
     ];
   }

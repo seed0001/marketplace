@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-import { buildSellerSystemPrompt, getSellerBusinessContext } from "@/lib/seller-ai";
+import {
+  buildSellerResponsePlan,
+  buildSellerSystemPrompt,
+  getSellerBusinessContext,
+} from "@/lib/seller-ai";
 import { getOpenRouterConfiguration } from "@/lib/ai-settings";
 
 const MAX_MESSAGE_LENGTH = 6000;
@@ -100,8 +104,19 @@ export async function POST(request: NextRequest) {
       }),
     ]);
 
+    const isContinueRequest = /^(continue|keep going|next|next batch|more|go on)[.! ]*$/i.test(content);
+    const hasPriorListingAudit = history.some(
+      (message) =>
+        message.role === "user" &&
+        /\baudit\b/i.test(message.content) &&
+        /\b(listing|listings|portfolio|products?)\b/i.test(message.content),
+    );
+    const responsePlan = buildSellerResponsePlan(content, isContinueRequest && hasPriorListingAudit);
     const providerMessages: OpenRouterMessage[] = [
-      { role: "system", content: buildSellerSystemPrompt(context) },
+      {
+        role: "system",
+        content: [buildSellerSystemPrompt(context), responsePlan].filter(Boolean).join("\n\n"),
+      },
       ...history.reverse().map((message) => ({
         role: message.role === "assistant" ? "assistant" as const : "user" as const,
         content: message.content,

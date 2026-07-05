@@ -13,6 +13,7 @@ export default async function ListingsPage(props: {
   if (searchParams.q) {
     where.OR = [
       { title: { contains: searchParams.q, mode: "insensitive" } },
+      { readme: { contains: searchParams.q, mode: "insensitive" } },
       { description: { contains: searchParams.q, mode: "insensitive" } },
     ];
   }
