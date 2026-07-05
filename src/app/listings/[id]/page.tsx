@@ -46,7 +46,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
       <div className="grid gap-8 sm:grid-cols-2 mb-12">
         <div className="aspect-[4/3] rounded-2xl bg-zinc-100 overflow-hidden">
           {listing.images[0] ? (
-            <img src={listing.images[0]} alt={listing.title} className="h-full w-full object-contain" />
+            <img src={listing.images[0]} alt={listing.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-zinc-200">
               <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">

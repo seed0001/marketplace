@@ -23,7 +23,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
           <img
             src={listing.images[0]}
             alt={listing.title}
-            className="h-full w-full object-contain group-hover:scale-105 transition duration-500"
+            className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-zinc-200">
