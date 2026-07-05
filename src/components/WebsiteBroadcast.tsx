@@ -1,17 +1,43 @@
 import { prisma } from "@/lib/prisma";
 
+// Rendered in the root layout, so this runs on every page — including the
+// static pages Next prerenders at build time, when the database is NOT
+// reachable (Railway's Postgres only exists at runtime). Any failure here must
+// degrade to "no broadcast" rather than crash the render, or the whole build
+// fails on /_not-found.
+async function getWebsites() {
+  try {
+    return await prisma.sellerWebsite.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { name: true } } },
+    });
+  } catch {
+    return [];
+  }
+}
+
+// Parse a hostname without throwing on a malformed/relative URL.
+function safeHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 export async function WebsiteBroadcast() {
-  const websites = await prisma.sellerWebsite.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { user: { select: { name: true } } },
-  });
+  const websites = await getWebsites();
 
-  if (websites.length === 0) return null;
+  const items = websites
+    .map((website) => ({
+      ...website,
+      sellerName: website.user.name || "a VibeMarket maker",
+      host: safeHostname(website.url),
+    }))
+    // Drop entries whose URL can't be parsed — they'd otherwise crash render.
+    .filter((website) => website.host !== null);
 
-  const items = websites.map((website) => ({
-    ...website,
-    sellerName: website.user.name || "a VibeMarket maker",
-  }));
+  if (items.length === 0) return null;
 
   return (
     <aside aria-label="Seller website broadcast" className="broadcast-bar">
@@ -39,7 +65,7 @@ export async function WebsiteBroadcast() {
                     <span className="broadcast-seller">by {website.sellerName}</span>
                   </span>
                   <span className="broadcast-link">
-                    {new URL(website.url).hostname.replace(/^www\./, "")} ↗
+                    {website.host} ↗
                   </span>
                 </a>
               ))}
