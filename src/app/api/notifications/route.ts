@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { activeNotificationWhere, getUserNotifications } from "@/lib/notifications";
+import { publicUrl } from "@/lib/public-url";
 
 function redirectToInbox(request: NextRequest) {
-  return NextResponse.redirect(new URL("/notifications", request.url), { status: 303 });
+  return NextResponse.redirect(publicUrl("/notifications", request), { status: 303 });
 }
 
 export async function GET() {
@@ -68,6 +69,6 @@ export async function POST(request: NextRequest) {
     revalidatePath("/notifications");
     return redirectToInbox(request);
   } catch {
-    return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/notifications", request.url), { status: 303 });
+    return NextResponse.redirect(publicUrl("/auth/signin?callbackUrl=/notifications", request), { status: 303 });
   }
 }

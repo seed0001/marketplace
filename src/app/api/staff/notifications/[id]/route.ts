@@ -3,17 +3,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { publicUrl } from "@/lib/public-url";
 
 const idSchema = z.string().cuid();
 
 function staffRedirect(request: NextRequest, status: "archived" | "error") {
-  const url = new URL("/staff/notifications", request.url);
+  const url = publicUrl("/staff/notifications", request);
   url.searchParams.set("status", status);
   return NextResponse.redirect(url, { status: 303 });
 }
 
 function signInRedirect(request: NextRequest) {
-  return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/staff/notifications", request.url), { status: 303 });
+  return NextResponse.redirect(publicUrl("/auth/signin?callbackUrl=/staff/notifications", request), { status: 303 });
 }
 
 async function getStaffUser() {

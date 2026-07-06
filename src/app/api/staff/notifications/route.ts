@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { notificationCategories, notificationPriorities } from "@/lib/notifications";
 import { isEmailConfigured, sendEmailNotification } from "@/lib/email";
 import { isSmsConfigured, sendSmsNotification } from "@/lib/sms";
+import { publicUrl } from "@/lib/public-url";
 
 const notificationSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -18,13 +19,13 @@ const notificationSchema = z.object({
 });
 
 function staffRedirect(request: NextRequest, status: "created" | "error") {
-  const url = new URL("/staff/notifications", request.url);
+  const url = publicUrl("/staff/notifications", request);
   url.searchParams.set("status", status);
   return NextResponse.redirect(url, { status: 303 });
 }
 
 function signInRedirect(request: NextRequest) {
-  return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/staff/notifications", request.url), { status: 303 });
+  return NextResponse.redirect(publicUrl("/auth/signin?callbackUrl=/staff/notifications", request), { status: 303 });
 }
 
 async function getStaffUser() {

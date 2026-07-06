@@ -19,8 +19,15 @@ export default async function SellerApiKeysPage() {
     headers(),
   ]);
 
-  const host = requestHeaders.get("host") || "your-marketplace.example";
-  const protocol = requestHeaders.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
+  // Behind Railway's proxy the plain `host` header is the container's internal
+  // binding (localhost:<port>); the public host arrives in x-forwarded-host.
+  const host =
+    requestHeaders.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    requestHeaders.get("host") ||
+    "your-marketplace.example";
+  const protocol =
+    requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
+    (host.startsWith("localhost") ? "http" : "https");
   const apiBase = `${protocol}://${host}`;
 
   const initialKeys = keys.map((key) => ({
