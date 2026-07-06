@@ -14,6 +14,36 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 }
 
+// Copy text to the clipboard, returning whether it succeeded. Prefers the
+// async Clipboard API, which browsers only expose in a secure context (HTTPS
+// or localhost). On a plain-HTTP origin — e.g. an app reached by bare IP —
+// that API is unavailable, so fall back to a hidden-textarea execCommand copy
+// that works without a secure context or any browser launch flags.
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== "undefined" && navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fall through to the legacy path below
+  }
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 export function ApiKeysManager({ initialKeys, apiBase }: { initialKeys: ApiKey[]; apiBase: string }) {
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
   const [name, setName] = useState("");
@@ -73,12 +103,7 @@ export function ApiKeysManager({ initialKeys, apiBase }: { initialKeys: ApiKey[]
 
   async function copyToken() {
     if (!freshToken) return;
-    try {
-      await navigator.clipboard.writeText(freshToken.token);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
+    setCopied(await copyText(freshToken.token));
   }
 
   return (
