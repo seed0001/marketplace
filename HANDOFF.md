@@ -49,16 +49,12 @@ to continue.
       real fix. `package.json` keeps the flag too, for local `npm start`
       consistency.
 
-### ⚠️ Open / needs verification
+### ✅ Resolved — confirmed fixed
 
-- **Confirm the latest deploy is green.** As of handoff, the fix (PR #10) was
-  merged to master (`b04e082`) but the redeploy had **not been verified**.
-  - If it comes up green: done.
-  - If it fails with a **different** error like
-    `could not create unique index "Conversation_directKey_key" ... is
-    duplicated`, then the `directKey` column has real duplicate non-null values.
-    `--accept-data-loss` can't fix a true uniqueness violation — those rows need
-    to be **deduped** before the unique index can build.
+- **The fix worked. The system is back up and running fine.** The Dockerfile
+  `CMD` change (PR #10, merged to master `b04e082`) resolved the crash-loop —
+  the redeploy came up green and production is stable. No duplicate-`directKey`
+  issue materialized; the unique constraint applied cleanly.
 
 ### Recommended follow-ups (not done)
 
