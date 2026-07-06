@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -36,6 +37,7 @@ export function Navbar() {
               <Link href="/messages" className="text-sm font-medium text-zinc-400 hover:text-emerald-500 transition-colors">
                 Messages
               </Link>
+              <NotificationBell />
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
@@ -52,6 +54,7 @@ export function Navbar() {
                         <Link href="/staff/roster" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Site roster</Link>
                         <Link href="/staff/content" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Manage content</Link>
                         <Link href="/staff/issues" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Issue reports</Link>
+                        <Link href="/staff/notifications" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Broadcasts</Link>
                         {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block px-4 py-2 text-sm text-indigo-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Discord control</Link>}
                         <Link href="/staff/analytics" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Intelligence</Link>
                       </>
@@ -114,6 +117,9 @@ export function Navbar() {
               <Link href="/messages" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Messages
               </Link>
+              <Link href="/notifications" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
+                Updates
+              </Link>
               <Link href="/profile" className="block py-1 text-sm text-zinc-300" onClick={() => setMenuOpen(false)}>
                 Profile
               </Link>
@@ -122,6 +128,7 @@ export function Navbar() {
                   <Link href="/staff/roster" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Site roster</Link>
                   <Link href="/staff/content" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Manage content</Link>
                   <Link href="/staff/issues" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Issue reports</Link>
+                  <Link href="/staff/notifications" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Broadcasts</Link>
                   {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block py-1 text-sm text-indigo-300" onClick={() => setMenuOpen(false)}>Discord control</Link>}
                   <Link href="/staff/analytics" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Intelligence</Link>
                 </>

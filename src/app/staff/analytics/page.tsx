@@ -126,6 +126,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
             {staff.role === "ADMIN" && <Link href="/staff/discord" className="rounded-lg border border-indigo-400/20 px-3 py-2 text-indigo-300 hover:bg-indigo-400/5">Discord</Link>}
             <Link href="/staff/roster" className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">Roster</Link>
             <Link href="/staff/issues" className="rounded-lg border border-amber-400/20 px-3 py-2 text-amber-300 hover:bg-amber-400/5">Issue reports</Link>
+            <Link href="/staff/notifications" className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">Broadcasts</Link>
             <Link href="/staff/content" className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">Manage content</Link>
             {staff.role === "ADMIN" && <Link href="/staff/ai-settings" className="rounded-lg border border-violet-400/20 px-3 py-2 text-violet-300 hover:bg-violet-400/5">AI setup</Link>}
             {staff.role === "ADMIN" && <Link href="/staff/briefings" className="rounded-lg border border-sky-400/20 px-3 py-2 text-sky-300 hover:bg-sky-400/5">Spoken briefings</Link>}

@@ -38,6 +38,8 @@ model User {
   discordSettingsUpdated DiscordBotSettings[] @relation("DiscordSettingsUpdatedBy")
   apiKeys              SellerApiKey[]
   apiKeyUsages         SellerApiKeyUsage[]
+  notificationsCreated SiteNotification[] @relation("NotificationCreatedBy")
+  notificationReceipts SiteNotificationReceipt[]
 }
 
 // A personal access token a seller generates so an external client — their
@@ -157,6 +159,51 @@ model SiteIssueReport {
 
   @@index([status, createdAt])
   @@index([reporterId])
+}
+
+model SiteNotification {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  category    String    @default("update")
+  priority    String    @default("normal")
+  audience    String    @default("all")
+  linkLabel   String?
+  linkHref    String?
+  startsAt    DateTime  @default(now())
+  expiresAt   DateTime?
+  archivedAt  DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdBy User? @relation("NotificationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  receipts  SiteNotificationReceipt[]
+
+  @@index([startsAt])
+  @@index([expiresAt])
+  @@index([archivedAt])
+  @@index([category, startsAt])
+  @@index([priority, startsAt])
+  @@index([createdById])
+}
+
+model SiteNotificationReceipt {
+  id             String    @id @default(cuid())
+  notificationId String
+  userId         String
+  readAt         DateTime?
+  dismissedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  notification SiteNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@index([userId, readAt])
+  @@index([userId, dismissedAt])
+  @@index([notificationId])
 }
 
 model ContentModerationEvent {
