@@ -378,6 +378,7 @@ model AiProviderSettings {
   id              String   @id @default("default")
   provider        String   @default("openrouter")
   model           String   @default("openrouter/auto")
+  persona         String?
   encryptedApiKey String?
   keyIv           String?
   keyTag          String?

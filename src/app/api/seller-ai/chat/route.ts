@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
     }
 
-    const { apiKey, model } = await getOpenRouterConfiguration();
+    const { apiKey, model, persona } = await getOpenRouterConfiguration();
     if (!apiKey) {
       return NextResponse.json(
         { error: "Seller AI is not configured yet. Add OPENROUTER_API_KEY to the server environment." },
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const providerMessages: OpenRouterMessage[] = [
       {
         role: "system",
-        content: [buildSellerSystemPrompt(context), responsePlan].filter(Boolean).join("\n\n"),
+        content: [buildSellerSystemPrompt(context, persona), responsePlan].filter(Boolean).join("\n\n"),
       },
       ...history.reverse().map((message) => ({
         role: message.role === "assistant" ? "assistant" as const : "user" as const,

@@ -22,6 +22,7 @@ export async function GET() {
   const config = await getOpenRouterConfiguration();
   return NextResponse.json({
     model: config.model,
+    persona: config.persona,
     configured: Boolean(config.apiKey),
     source: config.source,
     maskedKey: config.apiKey ? `••••••••${config.apiKey.slice(-4)}` : "",
@@ -37,8 +38,12 @@ export async function PUT(request: NextRequest) {
   const body = await request.json();
   const model = typeof body.model === "string" ? body.model.trim() : "";
   const newApiKey = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
+  const persona = typeof body.persona === "string" ? body.persona.trim() : "";
   if (!model || model.length > 200 || !/^[a-zA-Z0-9._:/-]+$/.test(model)) {
     return NextResponse.json({ error: "Enter a valid OpenRouter model ID." }, { status: 400 });
+  }
+  if (persona.length > 8000) {
+    return NextResponse.json({ error: "The persona statement is too long." }, { status: 400 });
   }
   if (newApiKey && !newApiKey.startsWith("sk-or-")) {
     return NextResponse.json({ error: "That does not look like an OpenRouter API key." }, { status: 400 });
@@ -68,11 +73,12 @@ export async function PUT(request: NextRequest) {
   }
 
   const encrypted = newApiKey ? encryptApiKey(newApiKey) : {};
+  const personaValue = persona || null;
   await prisma.aiProviderSettings.upsert({
     where: { id: "default" },
-    update: { model, updatedById: admin.id, ...encrypted },
-    create: { id: "default", model, updatedById: admin.id, ...encryptApiKey(keyToValidate) },
+    update: { model, persona: personaValue, updatedById: admin.id, ...encrypted },
+    create: { id: "default", model, persona: personaValue, updatedById: admin.id, ...encryptApiKey(keyToValidate) },
   });
 
-  return NextResponse.json({ ok: true, model, maskedKey: `••••••••${keyToValidate.slice(-4)}` });
+  return NextResponse.json({ ok: true, model, persona: persona, maskedKey: `••••••••${keyToValidate.slice(-4)}` });
 }

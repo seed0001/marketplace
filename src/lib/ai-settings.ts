@@ -41,6 +41,7 @@ export async function getOpenRouterConfiguration() {
   return {
     apiKey,
     model: settings?.model || process.env.OPENROUTER_MODEL || "openrouter/auto",
+    persona: settings?.persona?.trim() || "",
     source: settings?.encryptedApiKey ? "dashboard" : apiKey ? "environment" : "unconfigured",
   };
 }

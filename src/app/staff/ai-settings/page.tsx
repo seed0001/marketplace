@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getOpenRouterConfiguration } from "@/lib/ai-settings";
+import { DEFAULT_SELLER_PERSONA } from "@/lib/seller-ai";
 import { prisma } from "@/lib/prisma";
 import { requireAdministrator } from "@/lib/staff";
 import { AiSettingsForm } from "./AiSettingsForm";
@@ -29,6 +30,8 @@ export default async function AiSettingsPage() {
         <section className="mt-8 rounded-[26px] border border-white/10 bg-white/[.025] p-7">
           <AiSettingsForm
             initialModel={config.model}
+            initialPersona={config.persona}
+            defaultPersona={DEFAULT_SELLER_PERSONA}
             maskedKey={config.apiKey ? `••••••••${config.apiKey.slice(-4)}` : ""}
             source={config.source}
           />

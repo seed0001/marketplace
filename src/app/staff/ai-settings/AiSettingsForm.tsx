@@ -4,14 +4,19 @@ import { useState } from "react";
 
 export function AiSettingsForm({
   initialModel,
+  initialPersona,
+  defaultPersona,
   maskedKey,
   source,
 }: {
   initialModel: string;
+  initialPersona: string;
+  defaultPersona: string;
   maskedKey: string;
   source: string;
 }) {
   const [model, setModel] = useState(initialModel);
+  const [persona, setPersona] = useState(initialPersona);
   const [apiKey, setApiKey] = useState("");
   const [currentMaskedKey, setCurrentMaskedKey] = useState(maskedKey);
   const [currentSource, setCurrentSource] = useState(source);
@@ -26,12 +31,13 @@ export function AiSettingsForm({
       const response = await fetch("/api/admin/ai-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, apiKey }),
+        body: JSON.stringify({ model, apiKey, persona }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not save AI configuration.");
       setCurrentMaskedKey(data.maskedKey);
       setCurrentSource("dashboard");
+      setPersona(data.persona ?? persona);
       setApiKey("");
       setMessage({ kind: "success", text: "Configuration verified with OpenRouter and saved." });
     } catch (error) {
@@ -47,6 +53,15 @@ export function AiSettingsForm({
         <label htmlFor="model" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">OpenRouter model ID</label>
         <input id="model" value={model} onChange={(event) => setModel(event.target.value)} required placeholder="openrouter/auto" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 font-mono text-sm outline-none focus:border-emerald-400/50" />
         <p className="mt-2 text-xs leading-5 text-zinc-600">Use <code className="text-zinc-400">openrouter/auto</code> for automatic routing, or enter an exact OpenRouter model identifier. The model is verified before saving.</p>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <label htmlFor="persona" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Seller AI persona</label>
+          <button type="button" onClick={() => setPersona(defaultPersona)} className="text-[10px] text-zinc-500 underline-offset-2 hover:text-emerald-300 hover:underline">Reset to default</button>
+        </div>
+        <textarea id="persona" value={persona} onChange={(event) => setPersona(event.target.value)} rows={8} placeholder={defaultPersona} className="mt-2 w-full resize-y rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm leading-6 outline-none focus:border-emerald-400/50" />
+        <p className="mt-2 text-xs leading-5 text-zinc-600">Defines who the assistant is, how it should behave, and what it should help with. Leave blank to use the built-in default. This is prepended to every Seller Studio conversation; core safety rules always stay in effect.</p>
       </div>
 
       <div>

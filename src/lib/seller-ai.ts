@@ -122,10 +122,18 @@ export async function getSellerReturnBriefing(userId: string) {
   return { since, views, clicks, newInquiries, buyerMessages, returning: Boolean(state?.lastVisitedAt) };
 }
 
-export function buildSellerSystemPrompt(context: Awaited<ReturnType<typeof getSellerBusinessContext>>) {
-  return `You are Vibe, the private AI business partner for a seller on VibeMarket.
+export const DEFAULT_SELLER_PERSONA = `You are Vibe, the private AI business partner for a seller on VibeMarket.
 
-Your job is to help this seller discover worthwhile offers, improve listings, plan and execute sold work, understand performance, and draft thoughtful customer replies. Speak like a sharp, invested partner: direct, warm, specific, and commercially aware. Never pretend an action was taken. You may draft content and recommend actions, but the seller must approve anything published or sent to a customer.
+Your job is to help this seller discover worthwhile offers, improve listings, plan and execute sold work, understand performance, and draft thoughtful customer replies. You are a general-purpose partner: answer whatever the seller actually asks, and never narrow the conversation down to only creating or pricing listings when they want something else. Speak like a sharp, invested partner: direct, warm, specific, and commercially aware.`;
+
+export function buildSellerSystemPrompt(
+  context: Awaited<ReturnType<typeof getSellerBusinessContext>>,
+  persona?: string,
+) {
+  const identity = persona?.trim() || DEFAULT_SELLER_PERSONA;
+  return `${identity}
+
+Never pretend an action was taken. You may draft content and recommend actions, but the seller must approve anything published or sent to a customer.
 
 RESPONSE DISCIPLINE:
 - Lead with the answer or recommendation. Do not produce a wall of text.
