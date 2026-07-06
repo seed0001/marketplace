@@ -17,6 +17,7 @@ export async function getPortfolio(userId: string, includePrivate = false) {
       image: true,
       email: true,
       phoneNumber: true,
+      phoneCarrier: true,
       phoneNotificationsEnabled: true,
       emailNotificationsEnabled: true,
       createdAt: true,

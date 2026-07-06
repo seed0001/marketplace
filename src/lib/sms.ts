@@ -1,46 +1,49 @@
+import { isEmailConfigured, sendProviderEmail } from "@/lib/email";
+import { isValidGatewayDomain, normalizeGatewayDomain } from "@/lib/sms-carriers";
+
 type SmsResult = {
   status: "sent" | "skipped" | "failed";
   providerId?: string;
   error?: string;
 };
 
-function smsConfig() {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_FROM_NUMBER;
-  if (!accountSid || !authToken || !from) return null;
-  return { accountSid, authToken, from };
+// Carrier gateways address the handset by its 10-digit US number, without the
+// country code. Strip everything non-numeric and drop a leading US "1".
+function gatewayDigits(phone: string): string | null {
+  const digits = phone.replace(/\D/g, "");
+  const local = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  return local.length === 10 ? local : null;
 }
 
+// SMS now rides on the email provider, so it is "configured" whenever email is.
 export function isSmsConfigured() {
-  return Boolean(smsConfig());
+  return isEmailConfigured();
 }
 
-export async function sendSmsNotification(to: string | null, body: string): Promise<SmsResult> {
+// `gatewayDomain` is the carrier's email-to-SMS host stored on the user
+// (e.g. "vtext.com") — whether picked from the catalog or entered by hand.
+export async function sendSmsNotification(
+  to: string | null,
+  gatewayDomain: string | null,
+  subject: string,
+  body: string
+): Promise<SmsResult> {
   if (!to) return { status: "skipped", error: "No phone number" };
-  const config = smsConfig();
-  if (!config) return { status: "skipped", error: "SMS provider is not configured" };
 
-  try {
-    const params = new URLSearchParams({
-      To: to,
-      From: config.from,
-      Body: body.slice(0, 1500),
-    });
-    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${config.accountSid}/Messages.json`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${config.accountSid}:${config.authToken}`).toString("base64")}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      return { status: "failed", error: data.message || `SMS provider returned ${response.status}` };
-    }
-    return { status: "sent", providerId: typeof data.sid === "string" ? data.sid : undefined };
-  } catch (error) {
-    return { status: "failed", error: error instanceof Error ? error.message : "SMS delivery failed" };
+  if (!gatewayDomain || !isValidGatewayDomain(gatewayDomain)) {
+    return { status: "skipped", error: "No carrier gateway set for this number" };
   }
+  const gateway = normalizeGatewayDomain(gatewayDomain);
+
+  const digits = gatewayDigits(to);
+  if (!digits) return { status: "skipped", error: "Phone number is not a 10-digit US number" };
+
+  // Keep it short — carrier gateways split or truncate long messages. The
+  // subject carries the title; gateways that surface it show "title + body",
+  // and those that drop it still deliver the body.
+  return sendProviderEmail({
+    to: `${digits}@${gateway}`,
+    subject,
+    text: body.slice(0, 1200),
+  });
 }

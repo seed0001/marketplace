@@ -71,9 +71,9 @@ export default async function StaffNotificationsPage({
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       take: 500,
-      select: { id: true, name: true, email: true, phoneNumber: true, phoneNotificationsEnabled: true, emailNotificationsEnabled: true },
+      select: { id: true, name: true, email: true, phoneNumber: true, phoneCarrier: true, phoneNotificationsEnabled: true, emailNotificationsEnabled: true },
     }),
-    prisma.user.count({ where: { phoneNumber: { not: null }, phoneNotificationsEnabled: true } }),
+    prisma.user.count({ where: { phoneNumber: { not: null }, phoneCarrier: { not: null }, phoneNotificationsEnabled: true } }),
     prisma.siteNotificationDelivery.count({ where: { channel: "sms" } }),
     prisma.user.count({ where: { emailNotificationsEnabled: true } }),
     prisma.siteNotificationDelivery.count({ where: { channel: "email" } }),
@@ -115,6 +115,10 @@ export default async function StaffNotificationsPage({
           <Metric label="Email ready" value={number.format(emailReadyCount)} detail={emailConfigured ? `${emailDeliveryCount} email attempts logged` : "Provider not configured"} />
         </div>
 
+        <div className="mt-3 text-right">
+          <Link href="/staff/sms-gateways" className="text-xs text-zinc-500 hover:text-emerald-300">Manage SMS carriers →</Link>
+        </div>
+
         <div className="mt-6 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
           <section className="rounded-2xl border border-white/10 bg-white/[.025] p-6">
             <h2 className="font-semibold">Send a message</h2>
@@ -128,7 +132,7 @@ export default async function StaffNotificationsPage({
                 id: member.id,
                 label: member.name || member.email,
                 email: member.email,
-                phoneReady: Boolean(member.phoneNumber && member.phoneNotificationsEnabled),
+                phoneReady: Boolean(member.phoneNumber && member.phoneCarrier && member.phoneNotificationsEnabled),
                 emailReady: member.emailNotificationsEnabled,
               }))}
             />

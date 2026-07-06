@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
+import { isValidGatewayDomain, normalizeGatewayDomain } from "@/lib/sms-carriers";
 
 const MAX_IMAGE_BYTES = 4_000_000; // ~4MB; the client compresses well below this
 
@@ -31,6 +32,7 @@ export async function PATCH(request: NextRequest) {
     const data: {
       image?: string | null;
       phoneNumber?: string | null;
+      phoneCarrier?: string | null;
       phoneNotificationsEnabled?: boolean;
       emailNotificationsEnabled?: boolean;
     } = {};
@@ -51,7 +53,24 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: "Enter a valid phone number with area code." }, { status: 400 });
       }
       data.phoneNumber = phoneNumber || null;
-      if (!phoneNumber) data.phoneNotificationsEnabled = false;
+      // Clearing the number also clears the carrier and opt-in — they only make
+      // sense together.
+      if (!phoneNumber) {
+        data.phoneNotificationsEnabled = false;
+        data.phoneCarrier = null;
+      }
+    }
+
+    // Stored as the carrier's email-to-SMS gateway domain (e.g. "vtext.com"),
+    // whether chosen from the catalog or typed into the profile "Other" field.
+    if ("phoneCarrier" in body) {
+      if (body.phoneCarrier === null || body.phoneCarrier === "") {
+        data.phoneCarrier = null;
+      } else if (isValidGatewayDomain(body.phoneCarrier)) {
+        data.phoneCarrier = normalizeGatewayDomain(String(body.phoneCarrier));
+      } else {
+        return NextResponse.json({ error: "Enter a valid carrier gateway domain (e.g. vtext.com)." }, { status: 400 });
+      }
     }
 
     if ("phoneNotificationsEnabled" in body) {
@@ -74,6 +93,7 @@ export async function PATCH(request: NextRequest) {
         name: true,
         image: true,
         phoneNumber: true,
+        phoneCarrier: true,
         phoneNotificationsEnabled: true,
         emailNotificationsEnabled: true,
       },
