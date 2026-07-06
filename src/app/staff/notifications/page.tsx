@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
 import { formatRelativeTime } from "@/lib/utils";
 import { isSmsConfigured } from "@/lib/sms";
+import { isEmailConfigured } from "@/lib/email";
 import { archiveSiteNotification } from "./actions";
 import { StaffMessageComposer } from "./StaffMessageComposer";
 
@@ -43,7 +44,7 @@ export default async function StaffNotificationsPage({
   const notice = statusMessage(params.status);
   const now = new Date();
 
-  const [activeCount, urgentCount, totalReceipts, notifications, members, smsReadyCount, smsDeliveryCount] = await Promise.all([
+  const [activeCount, urgentCount, totalReceipts, notifications, members, smsReadyCount, smsDeliveryCount, emailReadyCount, emailDeliveryCount] = await Promise.all([
     prisma.siteNotification.count({
       where: {
         archivedAt: null,
@@ -71,12 +72,15 @@ export default async function StaffNotificationsPage({
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       take: 500,
-      select: { id: true, name: true, email: true, phoneNumber: true, phoneNotificationsEnabled: true },
+      select: { id: true, name: true, email: true, phoneNumber: true, phoneNotificationsEnabled: true, emailNotificationsEnabled: true },
     }),
     prisma.user.count({ where: { phoneNumber: { not: null }, phoneNotificationsEnabled: true } }),
     prisma.siteNotificationDelivery.count({ where: { channel: "sms" } }),
+    prisma.user.count({ where: { emailNotificationsEnabled: true } }),
+    prisma.siteNotificationDelivery.count({ where: { channel: "email" } }),
   ]);
   const smsConfigured = isSmsConfigured();
+  const emailConfigured = isEmailConfigured();
 
   return (
     <div className="min-h-screen bg-[#07090a] text-zinc-100">
@@ -109,6 +113,7 @@ export default async function StaffNotificationsPage({
           <Metric label="Urgent notices" value={number.format(urgentCount)} detail="Maintenance or high-priority items" />
           <Metric label="User actions" value={number.format(totalReceipts)} detail="Read and dismiss receipts all time" />
           <Metric label="SMS ready" value={number.format(smsReadyCount)} detail={smsConfigured ? `${smsDeliveryCount} SMS attempts logged` : "Provider not configured"} />
+          <Metric label="Email ready" value={number.format(emailReadyCount)} detail={emailConfigured ? `${emailDeliveryCount} email attempts logged` : "Provider not configured"} />
         </div>
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
@@ -119,11 +124,13 @@ export default async function StaffNotificationsPage({
             </p>
             <StaffMessageComposer
               smsConfigured={smsConfigured}
+              emailConfigured={emailConfigured}
               members={members.map((member) => ({
                 id: member.id,
                 label: member.name || member.email,
                 email: member.email,
                 phoneReady: Boolean(member.phoneNumber && member.phoneNotificationsEnabled),
+                emailReady: member.emailNotificationsEnabled,
               }))}
             />
           </section>

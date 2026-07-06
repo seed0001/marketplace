@@ -8,9 +8,18 @@ type MemberOption = {
   label: string;
   email: string;
   phoneReady: boolean;
+  emailReady: boolean;
 };
 
-export function StaffMessageComposer({ members, smsConfigured }: { members: MemberOption[]; smsConfigured: boolean }) {
+export function StaffMessageComposer({
+  members,
+  smsConfigured,
+  emailConfigured,
+}: {
+  members: MemberOption[];
+  smsConfigured: boolean;
+  emailConfigured: boolean;
+}) {
   const [audience, setAudience] = useState<"all" | "selected">("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -88,7 +97,10 @@ export function StaffMessageComposer({ members, smsConfigured }: { members: Memb
                     <span className="block truncate text-sm text-zinc-200">{member.label}</span>
                     <span className="block truncate text-[11px] text-zinc-600">{member.email}</span>
                   </span>
-                  {member.phoneReady && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-300">SMS</span>}
+                  <span className="flex shrink-0 gap-1">
+                    {member.emailReady && <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[10px] text-emerald-300">Email</span>}
+                    {member.phoneReady && <span className="rounded-full bg-sky-400/10 px-2 py-1 text-[10px] text-sky-300">SMS</span>}
+                  </span>
                 </label>
               ))}
               {filtered.length === 0 && <div className="px-3 py-8 text-center text-sm text-zinc-600">No members match that search.</div>}
@@ -104,6 +116,9 @@ export function StaffMessageComposer({ members, smsConfigured }: { members: Memb
       </div>
       <p className={`text-[11px] ${smsConfigured ? "text-sky-300" : "text-amber-300"}`}>
         {smsConfigured ? "SMS-ready members will also receive this automatically." : "SMS is not configured, so this will send as a website notification only."}
+      </p>
+      <p className={`text-[11px] ${emailConfigured ? "text-emerald-300" : "text-amber-300"}`}>
+        {emailConfigured ? "Email-ready members will also receive this automatically." : "Email is not configured, so no email copies will send yet."}
       </p>
 
       <button className="w-full rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-300">

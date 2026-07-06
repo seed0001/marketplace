@@ -88,6 +88,7 @@ export function Portfolio({
         <ProfileContactSettings
           initialPhoneNumber={user.phoneNumber}
           initialPhoneNotificationsEnabled={user.phoneNotificationsEnabled}
+          initialEmailNotificationsEnabled={user.emailNotificationsEnabled}
         />
       )}
 

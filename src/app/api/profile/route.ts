@@ -28,7 +28,12 @@ export async function PATCH(request: NextRequest) {
     const session = await requireAuth();
     const body = await request.json();
 
-    const data: { image?: string | null; phoneNumber?: string | null; phoneNotificationsEnabled?: boolean } = {};
+    const data: {
+      image?: string | null;
+      phoneNumber?: string | null;
+      phoneNotificationsEnabled?: boolean;
+      emailNotificationsEnabled?: boolean;
+    } = {};
 
     if ("image" in body) {
       if (body.image === null || body.image === "") {
@@ -53,6 +58,10 @@ export async function PATCH(request: NextRequest) {
       data.phoneNotificationsEnabled = Boolean(body.phoneNotificationsEnabled);
     }
 
+    if ("emailNotificationsEnabled" in body) {
+      data.emailNotificationsEnabled = Boolean(body.emailNotificationsEnabled);
+    }
+
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
     }
@@ -60,7 +69,14 @@ export async function PATCH(request: NextRequest) {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data,
-      select: { id: true, name: true, image: true, phoneNumber: true, phoneNotificationsEnabled: true },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        phoneNumber: true,
+        phoneNotificationsEnabled: true,
+        emailNotificationsEnabled: true,
+      },
     });
 
     return NextResponse.json(user);

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
 import { notificationCategories, notificationPriorities } from "@/lib/notifications";
+import { isEmailConfigured, sendEmailNotification } from "@/lib/email";
 import { isSmsConfigured, sendSmsNotification } from "@/lib/sms";
 
 const notificationSchema = z.object({
@@ -88,6 +89,31 @@ export async function publishSiteNotification(formData: FormData) {
           notificationId: notification.id,
           userId: recipient.id,
           channel: "sms",
+          status: result.status,
+          error: result.error?.slice(0, 1000),
+          providerId: result.providerId,
+          deliveredAt: result.status === "sent" ? new Date() : null,
+        },
+      });
+    }
+  }
+
+  if (isEmailConfigured()) {
+    const emailRecipients = await prisma.user.findMany({
+      where: {
+        emailNotificationsEnabled: true,
+        ...(data.audience === "selected" ? { id: { in: recipientIds } } : {}),
+      },
+      select: { id: true, email: true },
+    });
+
+    for (const recipient of emailRecipients) {
+      const result = await sendEmailNotification(recipient.email, data.title, data.body);
+      await prisma.siteNotificationDelivery.create({
+        data: {
+          notificationId: notification.id,
+          userId: recipient.id,
+          channel: "email",
           status: result.status,
           error: result.error?.slice(0, 1000),
           providerId: result.providerId,

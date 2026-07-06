@@ -18,6 +18,7 @@ export async function getPortfolio(userId: string, includePrivate = false) {
       email: true,
       phoneNumber: true,
       phoneNotificationsEnabled: true,
+      emailNotificationsEnabled: true,
       createdAt: true,
       websites: { orderBy: { createdAt: "asc" } },
     },

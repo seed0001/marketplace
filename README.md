@@ -151,3 +151,15 @@ Administrators can also configure and verify the OpenRouter key and model at
 `/staff/ai-settings`. Dashboard-supplied keys are AES-256-GCM encrypted in the
 database using `AI_SETTINGS_ENCRYPTION_KEY`, falling back to `AUTH_SECRET`.
 Environment-based OpenRouter settings remain available as a deployment fallback.
+
+## Notifications
+
+Staff can send website notifications from `/staff/notifications`. Email delivery
+is optional and uses Resend-compatible environment variables:
+
+```bash
+RESEND_API_KEY="re_..."
+EMAIL_FROM="VibeMarket <updates@yourdomain.com>"
+```
+
+Members opt into email alerts from their profile contact settings.
