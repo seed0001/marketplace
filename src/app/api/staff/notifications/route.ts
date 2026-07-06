@@ -91,14 +91,14 @@ export async function POST(request: NextRequest) {
       where: {
         phoneNotificationsEnabled: true,
         phoneNumber: { not: null },
+        phoneCarrier: { not: null },
         ...(data.audience === "selected" ? { id: { in: recipientIds } } : {}),
       },
-      select: { id: true, phoneNumber: true },
+      select: { id: true, phoneNumber: true, phoneCarrier: true },
     });
 
-    const smsBody = `${data.title}\n\n${data.body}`;
     for (const recipient of smsRecipients) {
-      const result = await sendSmsNotification(recipient.phoneNumber, smsBody);
+      const result = await sendSmsNotification(recipient.phoneNumber, recipient.phoneCarrier, data.title, data.body);
       await prisma.siteNotificationDelivery.create({
         data: {
           notificationId: notification.id,

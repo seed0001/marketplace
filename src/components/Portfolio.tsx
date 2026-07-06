@@ -5,6 +5,7 @@ import { DirectMessageButton } from "@/components/DirectMessageButton";
 import { ProfileContactSettings } from "@/components/ProfileContactSettings";
 import { WebsiteShowcaseEditor } from "@/components/WebsiteShowcaseEditor";
 import type { Portfolio as PortfolioData } from "@/lib/portfolio";
+import { getSmsGatewayOptions } from "@/lib/sms-gateways";
 import { formatPrice, formatDate, formatRelativeTime } from "@/lib/utils";
 
 function Stars({ value }: { value: number | null }) {
@@ -35,7 +36,7 @@ function StatCard({
   );
 }
 
-export function Portfolio({
+export async function Portfolio({
   data,
   isOwner,
 }: {
@@ -43,6 +44,8 @@ export function Portfolio({
   isOwner: boolean;
 }) {
   const { user, listings, stats, feedbackReceived, recentViews } = data;
+  // Only the owner sees the contact settings, so only they need the carrier list.
+  const smsGateways = isOwner ? await getSmsGatewayOptions() : [];
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
@@ -87,8 +90,10 @@ export function Portfolio({
       {isOwner && (
         <ProfileContactSettings
           initialPhoneNumber={user.phoneNumber}
+          initialPhoneCarrier={user.phoneCarrier}
           initialPhoneNotificationsEnabled={user.phoneNotificationsEnabled}
           initialEmailNotificationsEnabled={user.emailNotificationsEnabled}
+          gateways={smsGateways}
         />
       )}
 
