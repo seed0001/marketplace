@@ -49,6 +49,7 @@ export function Navbar() {
                   <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-border bg-surface py-1 shadow-lg">
                     {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
                       <>
+                        <Link href="/staff/roster" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Site roster</Link>
                         <Link href="/staff/content" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Manage content</Link>
                         <Link href="/staff/issues" className="block px-4 py-2 text-sm text-emerald-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Issue reports</Link>
                         {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block px-4 py-2 text-sm text-indigo-300 hover:bg-zinc-800" onClick={() => setMenuOpen(false)}>Discord control</Link>}
@@ -118,6 +119,7 @@ export function Navbar() {
               </Link>
               {(session.user.role === "STAFF" || session.user.role === "ADMIN") && (
                 <>
+                  <Link href="/staff/roster" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Site roster</Link>
                   <Link href="/staff/content" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Manage content</Link>
                   <Link href="/staff/issues" className="block py-1 text-sm text-emerald-300" onClick={() => setMenuOpen(false)}>Issue reports</Link>
                   {session.user.role === "ADMIN" && <Link href="/staff/discord" className="block py-1 text-sm text-indigo-300" onClick={() => setMenuOpen(false)}>Discord control</Link>}
