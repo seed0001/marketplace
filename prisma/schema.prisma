@@ -36,6 +36,29 @@ model User {
   moderationEvents     ContentModerationEvent[] @relation("ModerationActor")
   issueReports         SiteIssueReport[] @relation("IssueReporter")
   discordSettingsUpdated DiscordBotSettings[] @relation("DiscordSettingsUpdatedBy")
+  apiKeys              SellerApiKey[]
+}
+
+// A personal access token a seller generates so an external client — their
+// local app or a local AI agent — can authenticate to the programmatic API
+// and manage their listings. Only a SHA-256 hash of the token is stored; the
+// plaintext is shown to the seller exactly once at creation time. `prefix` is
+// a short, non-secret slice kept for display so a seller can tell their keys
+// apart. Revoking sets `revokedAt` (soft delete) so the key stops working.
+model SellerApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  prefix     String
+  hashedKey  String    @unique
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([hashedKey])
 }
 
 model DiscordBotSettings {

@@ -60,6 +60,7 @@ export default async function SellerStudioPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/listings/new" className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-300 hover:bg-white/5">New listing</Link>
+            <Link href="/seller/api-keys" className="rounded-xl border border-white/10 px-3 py-2 text-xs text-zinc-300 hover:bg-white/5">API keys</Link>
             <Link href="/profile" className="hidden rounded-xl bg-emerald-400 px-3 py-2 text-xs font-semibold text-black hover:bg-emerald-300 sm:block">Portfolio</Link>
           </div>
         </div>
