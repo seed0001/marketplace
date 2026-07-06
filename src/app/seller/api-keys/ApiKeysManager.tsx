@@ -168,6 +168,64 @@ export function ApiKeysManager({ initialKeys, apiBase }: { initialKeys: ApiKey[]
       </section>
 
       <section className="rounded-2xl border border-white/[.07] bg-white/[.025] p-5">
+        <h2 className="text-sm font-semibold">What you can do with a key</h2>
+        <p className="mt-0.5 text-[11px] leading-5 text-zinc-500">
+          A key lets an app or AI agent act as you over the marketplace API. Every request is scoped to your own
+          account — a key can only ever read and change <span className="text-zinc-300">your</span> listings, and never
+          touches another seller, your messages, or your account settings.
+        </p>
+
+        <div className="mt-4 space-y-2">
+          {[
+            { label: "Check the connection", detail: "Confirm the key works and see which account it’s acting on." },
+            { label: "List your listings", detail: "Pull all of your listings — any status — to sync or review them." },
+            { label: "Create a listing", detail: "Publish a new listing with title, price, description, images, and more." },
+            { label: "Update a listing", detail: "Edit any field, or flip status between active, sold, and draft." },
+            { label: "Delete a listing", detail: "Permanently remove one of your listings." },
+          ].map((item) => (
+            <div key={item.label} className="flex gap-2.5">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400/80" />
+              <p className="text-[11px] leading-5 text-zinc-400">
+                <span className="font-medium text-zinc-200">{item.label}.</span> {item.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <h3 className="mt-5 text-[11px] font-semibold uppercase tracking-[.15em] text-zinc-500">Endpoints</h3>
+        <div className="mt-2 overflow-x-auto">
+          <table className="w-full border-collapse text-left font-mono text-[11px]">
+            <tbody className="text-zinc-400">
+              {[
+                { method: "GET", path: "/api/v1/me", note: "Who this key belongs to" },
+                { method: "GET", path: "/api/v1/listings", note: "All of your listings" },
+                { method: "POST", path: "/api/v1/listings", note: "Create a listing" },
+                { method: "GET", path: "/api/v1/listings/:id", note: "One listing" },
+                { method: "PUT", path: "/api/v1/listings/:id", note: "Update a listing" },
+                { method: "DELETE", path: "/api/v1/listings/:id", note: "Delete a listing" },
+              ].map((row) => (
+                <tr key={`${row.method} ${row.path}`} className="border-b border-white/[.05] last:border-0">
+                  <td className="whitespace-nowrap py-2 pr-3 align-top font-semibold text-emerald-300">{row.method}</td>
+                  <td className="whitespace-nowrap py-2 pr-4 align-top text-zinc-200">{row.path}</td>
+                  <td className="py-2 align-top text-zinc-500">{row.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 className="mt-5 text-[11px] font-semibold uppercase tracking-[.15em] text-zinc-500">Listing fields</h3>
+        <p className="mt-2 text-[11px] leading-5 text-zinc-500">
+          When creating or updating, send a JSON body. <code className="text-zinc-300">title</code> and{" "}
+          <code className="text-zinc-300">price</code> are required on create; everything else is optional:{" "}
+          <code className="text-zinc-400">description</code>, <code className="text-zinc-400">images</code> (URLs),{" "}
+          <code className="text-zinc-400">category</code>, <code className="text-zinc-400">condition</code>,{" "}
+          <code className="text-zinc-400">status</code>, <code className="text-zinc-400">readme</code>,{" "}
+          <code className="text-zinc-400">adult</code>.
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-white/[.07] bg-white/[.025] p-5">
         <h2 className="text-sm font-semibold">Connect your app</h2>
         <p className="mt-0.5 text-[11px] leading-5 text-zinc-500">
           Send the key as a bearer token. It acts only on your own listings.
