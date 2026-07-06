@@ -37,6 +37,7 @@ model User {
   issueReports         SiteIssueReport[] @relation("IssueReporter")
   discordSettingsUpdated DiscordBotSettings[] @relation("DiscordSettingsUpdatedBy")
   apiKeys              SellerApiKey[]
+  apiKeyUsages         SellerApiKeyUsage[]
 }
 
 // A personal access token a seller generates so an external client — their
@@ -56,9 +57,34 @@ model SellerApiKey {
   createdAt  DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usages SellerApiKeyUsage[]
 
   @@index([userId])
   @@index([hashedKey])
+}
+
+// Request-level telemetry for the seller programmatic API. This tracks how
+// valid API keys are used without storing request bodies, response bodies, raw
+// IP addresses, or bearer tokens.
+model SellerApiKeyUsage {
+  id         String   @id @default(cuid())
+  apiKeyId  String
+  userId    String
+  method     String
+  path       String
+  route      String
+  statusCode Int
+  userAgent  String?
+  occurredAt DateTime @default(now())
+
+  apiKey SellerApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([route, occurredAt])
+  @@index([statusCode, occurredAt])
+  @@index([occurredAt])
 }
 
 model DiscordBotSettings {

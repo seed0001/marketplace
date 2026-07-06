@@ -122,6 +122,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
           </div>
           <div className="flex items-center gap-4 text-xs text-zinc-500">
             <span className="hidden sm:inline">Signed in as {staff.name || staff.email}</span>
+            <Link href="/staff/api-analytics" className="rounded-lg border border-cyan-400/20 px-3 py-2 text-cyan-300 hover:bg-cyan-400/5">API analytics</Link>
             {staff.role === "ADMIN" && <Link href="/staff/discord" className="rounded-lg border border-indigo-400/20 px-3 py-2 text-indigo-300 hover:bg-indigo-400/5">Discord</Link>}
             <Link href="/staff/roster" className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">Roster</Link>
             <Link href="/staff/issues" className="rounded-lg border border-amber-400/20 px-3 py-2 text-amber-300 hover:bg-amber-400/5">Issue reports</Link>

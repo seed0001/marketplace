@@ -1,5 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // Human-readable, greppable token prefix. Everything after it is 32 random
@@ -44,6 +45,14 @@ export type ApiKeyPrincipal = {
   keyId: string;
 };
 
+type ApiUsageRoute =
+  | "GET /api/v1/me"
+  | "GET /api/v1/listings"
+  | "POST /api/v1/listings"
+  | "GET /api/v1/listings/:id"
+  | "PUT /api/v1/listings/:id"
+  | "DELETE /api/v1/listings/:id";
+
 /**
  * Authenticate a programmatic request via its `Authorization: Bearer <token>`
  * header. Returns the owning seller's identity, or null when the token is
@@ -70,4 +79,39 @@ export async function authenticateApiKey(request: NextRequest): Promise<ApiKeyPr
   });
 
   return { userId: record.userId, keyId: record.id };
+}
+
+async function recordApiKeyUsage(
+  request: NextRequest,
+  principal: ApiKeyPrincipal,
+  route: ApiUsageRoute,
+  statusCode: number
+) {
+  try {
+    await prisma.sellerApiKeyUsage.create({
+      data: {
+        apiKeyId: principal.keyId,
+        userId: principal.userId,
+        method: request.method,
+        path: request.nextUrl.pathname,
+        route,
+        statusCode,
+        userAgent: request.headers.get("user-agent"),
+      },
+    });
+  } catch (error) {
+    console.error("Could not record API key usage", error);
+  }
+}
+
+export async function jsonWithApiUsage<JsonBody>(
+  request: NextRequest,
+  principal: ApiKeyPrincipal,
+  route: ApiUsageRoute,
+  body: JsonBody,
+  init?: ResponseInit
+) {
+  const response = NextResponse.json(body, init);
+  await recordApiKeyUsage(request, principal, route, response.status);
+  return response;
 }

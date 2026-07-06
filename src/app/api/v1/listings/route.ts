@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeImages } from "@/lib/utils";
 import { queueDiscordEvent } from "@/lib/discord";
-import { authenticateApiKey } from "@/lib/api-keys";
+import { authenticateApiKey, jsonWithApiUsage } from "@/lib/api-keys";
 
 // Programmatic listing management for external clients (a seller's local app
 // or AI agent) authenticated with a personal API key. Scoped entirely to the
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     where: { userId: principal.userId },
     orderBy: { createdAt: "desc" },
   });
-  return NextResponse.json(listings);
+  return jsonWithApiUsage(request, principal, "GET /api/v1/listings", listings);
 }
 
 export async function POST(request: NextRequest) {
@@ -28,16 +28,16 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json().catch(() => null);
-  if (!body) return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  if (!body) return jsonWithApiUsage(request, principal, "POST /api/v1/listings", { error: "Invalid JSON body" }, { status: 400 });
 
   const { title, description, price, images, category, condition, sections, readme, adult } = body;
   if (!title || price === undefined || price === null || price === "") {
-    return NextResponse.json({ error: "Missing required fields: title, price" }, { status: 400 });
+    return jsonWithApiUsage(request, principal, "POST /api/v1/listings", { error: "Missing required fields: title, price" }, { status: 400 });
   }
 
   const parsedPrice = parseFloat(price);
   if (Number.isNaN(parsedPrice)) {
-    return NextResponse.json({ error: "price must be a number" }, { status: 400 });
+    return jsonWithApiUsage(request, principal, "POST /api/v1/listings", { error: "price must be a number" }, { status: 400 });
   }
 
   const listing = await prisma.listing.create({
@@ -66,5 +66,5 @@ export async function POST(request: NextRequest) {
     ],
   });
 
-  return NextResponse.json(listing, { status: 201 });
+  return jsonWithApiUsage(request, principal, "POST /api/v1/listings", listing, { status: 201 });
 }
