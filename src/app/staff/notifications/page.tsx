@@ -4,7 +4,6 @@ import { requireStaff } from "@/lib/staff";
 import { formatRelativeTime } from "@/lib/utils";
 import { isSmsConfigured } from "@/lib/sms";
 import { isEmailConfigured } from "@/lib/email";
-import { archiveSiteNotification } from "./actions";
 import { StaffMessageComposer } from "./StaffMessageComposer";
 
 export const dynamic = "force-dynamic";
@@ -174,8 +173,7 @@ export default async function StaffNotificationsPage({
                         </div>
                       </div>
                       {!archived && (
-                        <form action={archiveSiteNotification}>
-                          <input type="hidden" name="notificationId" value={notification.id} />
+                        <form action={`/api/staff/notifications/${notification.id}`} method="post">
                           <button className="rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200">
                             Archive
                           </button>

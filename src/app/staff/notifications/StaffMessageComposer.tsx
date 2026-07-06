@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { publishSiteNotification } from "./actions";
 
 type MemberOption = {
   id: string;
@@ -37,7 +36,7 @@ export function StaffMessageComposer({
   }
 
   return (
-    <form action={publishSiteNotification} className="mt-5 space-y-4">
+    <form action="/api/staff/notifications" method="post" className="mt-5 space-y-4">
       <div>
         <label htmlFor="title" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Subject</label>
         <input id="title" name="title" required maxLength={120} placeholder="Scheduled maintenance tonight" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />

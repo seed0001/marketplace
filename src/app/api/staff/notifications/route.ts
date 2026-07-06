@@ -1,10 +1,8 @@
-"use server";
-
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/staff";
+import { auth } from "@/lib/auth";
 import { notificationCategories, notificationPriorities } from "@/lib/notifications";
 import { isEmailConfigured, sendEmailNotification } from "@/lib/email";
 import { isSmsConfigured, sendSmsNotification } from "@/lib/sms";
@@ -19,7 +17,26 @@ const notificationSchema = z.object({
   expiresAt: z.string().trim().optional(),
 });
 
-const idSchema = z.string().cuid();
+function staffRedirect(request: NextRequest, status: "created" | "error") {
+  const url = new URL("/staff/notifications", request.url);
+  url.searchParams.set("status", status);
+  return NextResponse.redirect(url, { status: 303 });
+}
+
+function signInRedirect(request: NextRequest) {
+  return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/staff/notifications", request.url), { status: 303 });
+}
+
+async function getStaffUser() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, role: true },
+  });
+  if (!user || !["STAFF", "ADMIN"].includes(user.role)) return null;
+  return user;
+}
 
 function parseExpiresAt(value?: string) {
   if (!value) return null;
@@ -28,12 +45,11 @@ function parseExpiresAt(value?: string) {
   return expiresAt;
 }
 
-function notificationRedirect(kind: "created" | "archived" | "error") {
-  redirect(`/staff/notifications?status=${kind}`);
-}
+export async function POST(request: NextRequest) {
+  const staff = await getStaffUser();
+  if (!staff) return signInRedirect(request);
 
-export async function publishSiteNotification(formData: FormData) {
-  const staff = await requireStaff();
+  const formData = await request.formData();
   const parsed = notificationSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
@@ -44,13 +60,12 @@ export async function publishSiteNotification(formData: FormData) {
     expiresAt: formData.get("expiresAt") || undefined,
   });
 
-  if (!parsed.success) return notificationRedirect("error");
+  if (!parsed.success) return staffRedirect(request, "error");
 
   const data = parsed.data;
   const recipientIds = [...new Set(data.recipientIds)];
-  if (data.audience === "selected" && recipientIds.length === 0) return notificationRedirect("error");
+  if (data.audience === "selected" && recipientIds.length === 0) return staffRedirect(request, "error");
 
-  const expiresAt = parseExpiresAt(data.expiresAt);
   const notification = await prisma.siteNotification.create({
     data: {
       title: data.title,
@@ -60,7 +75,7 @@ export async function publishSiteNotification(formData: FormData) {
       audience: data.audience,
       linkLabel: null,
       linkHref: null,
-      expiresAt,
+      expiresAt: parseExpiresAt(data.expiresAt),
       createdById: staff.id,
       targets: data.audience === "selected" ? {
         createMany: {
@@ -125,17 +140,5 @@ export async function publishSiteNotification(formData: FormData) {
 
   revalidatePath("/notifications");
   revalidatePath("/staff/notifications");
-  notificationRedirect("created");
-}
-
-export async function archiveSiteNotification(formData: FormData) {
-  await requireStaff();
-  const id = idSchema.parse(formData.get("notificationId"));
-  await prisma.siteNotification.update({
-    where: { id },
-    data: { archivedAt: new Date() },
-  });
-  revalidatePath("/notifications");
-  revalidatePath("/staff/notifications");
-  notificationRedirect("archived");
+  return staffRedirect(request, "created");
 }

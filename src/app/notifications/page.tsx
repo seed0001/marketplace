@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { formatRelativeTime } from "@/lib/utils";
 import { getUserNotifications } from "@/lib/notifications";
-import { dismissNotification, markAllNotificationsRead, markNotificationRead } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +32,8 @@ export default async function NotificationsPage() {
           </div>
           <div className="flex items-center gap-2 text-xs">
             {unreadCount > 0 && (
-              <form action={markAllNotificationsRead}>
+              <form action="/api/notifications" method="post">
+                <input type="hidden" name="action" value="read_all" />
                 <button className="rounded-lg border border-emerald-400/20 px-3 py-2 text-emerald-300 hover:bg-emerald-400/5">
                   Mark all read
                 </button>
@@ -84,13 +84,13 @@ export default async function NotificationsPage() {
                     </Link>
                   )}
                   {!notification.readAt && (
-                    <form action={markNotificationRead}>
-                      <input type="hidden" name="notificationId" value={notification.id} />
+                    <form action={`/api/notifications/${notification.id}`} method="post">
+                      <input type="hidden" name="action" value="read" />
                       <button className="rounded-xl border border-white/10 px-4 py-2 text-xs text-zinc-300 hover:bg-white/5">Mark read</button>
                     </form>
                   )}
-                  <form action={dismissNotification}>
-                    <input type="hidden" name="notificationId" value={notification.id} />
+                  <form action={`/api/notifications/${notification.id}`} method="post">
+                    <input type="hidden" name="action" value="dismiss" />
                     <button className="rounded-xl border border-white/10 px-4 py-2 text-xs text-zinc-500 hover:bg-white/5 hover:text-zinc-300">Dismiss</button>
                   </form>
                 </div>

@@ -1,6 +1,12 @@
-import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
-import { getUserNotifications } from "@/lib/notifications";
+import { activeNotificationWhere, getUserNotifications } from "@/lib/notifications";
+
+function redirectToInbox(request: NextRequest) {
+  return NextResponse.redirect(new URL("/notifications", request.url), { status: 303 });
+}
 
 export async function GET() {
   try {
@@ -20,5 +26,48 @@ export async function GET() {
     });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await requireAuth();
+    const formData = await request.formData();
+    if (formData.get("action") !== "read_all") {
+      return redirectToInbox(request);
+    }
+
+    const notifications = await prisma.siteNotification.findMany({
+      where: {
+        ...activeNotificationWhere(),
+        AND: [
+          {
+            OR: [
+              { audience: "all" },
+              { targets: { some: { userId: session.user.id } } },
+            ],
+          },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (notifications.length > 0) {
+      const now = new Date();
+      await prisma.$transaction(
+        notifications.map((notification) =>
+          prisma.siteNotificationReceipt.upsert({
+            where: { notificationId_userId: { notificationId: notification.id, userId: session.user.id } },
+            update: { readAt: now },
+            create: { notificationId: notification.id, userId: session.user.id, readAt: now },
+          })
+        )
+      );
+    }
+
+    revalidatePath("/notifications");
+    return redirectToInbox(request);
+  } catch {
+    return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/notifications", request.url), { status: 303 });
   }
 }
