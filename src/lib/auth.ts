@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
-const OWNER_EMAIL = "travisbollenbach@gmail.com";
+export const OWNER_EMAIL = "travisbollenbach@gmail.com";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
