@@ -24,4 +24,4 @@ COPY --from=base /app/prisma ./prisma
 COPY --from=base /app/prisma.config.ts ./
 
 EXPOSE 3000
-CMD npx prisma db push && npx next start
+CMD npx prisma db push --accept-data-loss && npx next start
