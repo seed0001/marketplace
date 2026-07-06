@@ -110,7 +110,7 @@ export default async function ListingPage(props: { params: Promise<{ id: string 
             </div>
           </Link>
 
-          <ListingActions listingId={listing.id} sellerId={listing.userId} isOwner={isOwner} />
+          <ListingActions listingId={listing.id} isOwner={isOwner} />
         </div>
       </div>
 

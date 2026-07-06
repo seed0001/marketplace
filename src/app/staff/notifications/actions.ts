@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
 import { notificationCategories, notificationPriorities } from "@/lib/notifications";
+import { sendSmsNotification } from "@/lib/sms";
 
 const hrefSchema = z
   .string()
@@ -20,6 +21,9 @@ const notificationSchema = z.object({
   body: z.string().trim().min(10).max(3000),
   category: z.enum(notificationCategories),
   priority: z.enum(notificationPriorities),
+  audience: z.enum(["all", "selected"]),
+  recipientIds: z.array(z.string().cuid()).default([]),
+  sendSms: z.boolean().default(false),
   linkLabel: z.string().trim().max(80).optional(),
   linkHref: hrefSchema.optional(),
   expiresAt: z.string().trim().optional(),
@@ -45,6 +49,9 @@ export async function publishSiteNotification(formData: FormData) {
     body: formData.get("body"),
     category: formData.get("category"),
     priority: formData.get("priority"),
+    audience: formData.get("audience") === "selected" ? "selected" : "all",
+    recipientIds: formData.getAll("recipientIds"),
+    sendSms: formData.get("sendSms") === "on",
     linkLabel: formData.get("linkLabel") || undefined,
     linkHref: formData.get("linkHref") || undefined,
     expiresAt: formData.get("expiresAt") || undefined,
@@ -53,19 +60,56 @@ export async function publishSiteNotification(formData: FormData) {
   if (!parsed.success) return notificationRedirect("error");
 
   const data = parsed.data;
+  const recipientIds = [...new Set(data.recipientIds)];
+  if (data.audience === "selected" && recipientIds.length === 0) return notificationRedirect("error");
+
   const expiresAt = parseExpiresAt(data.expiresAt);
-  await prisma.siteNotification.create({
+  const notification = await prisma.siteNotification.create({
     data: {
       title: data.title,
       body: data.body,
       category: data.category,
       priority: data.priority,
+      audience: data.audience,
       linkLabel: data.linkLabel || null,
       linkHref: data.linkHref || null,
       expiresAt,
       createdById: staff.id,
+      targets: data.audience === "selected" ? {
+        createMany: {
+          data: recipientIds.map((userId) => ({ userId })),
+          skipDuplicates: true,
+        },
+      } : undefined,
     },
   });
+
+  if (data.sendSms) {
+    const smsRecipients = await prisma.user.findMany({
+      where: {
+        phoneNotificationsEnabled: true,
+        phoneNumber: { not: null },
+        ...(data.audience === "selected" ? { id: { in: recipientIds } } : {}),
+      },
+      select: { id: true, phoneNumber: true },
+    });
+
+    const smsBody = `${data.title}\n\n${data.body}${data.linkHref ? `\n\n${data.linkHref}` : ""}`;
+    for (const recipient of smsRecipients) {
+      const result = await sendSmsNotification(recipient.phoneNumber, smsBody);
+      await prisma.siteNotificationDelivery.create({
+        data: {
+          notificationId: notification.id,
+          userId: recipient.id,
+          channel: "sms",
+          status: result.status,
+          error: result.error?.slice(0, 1000),
+          providerId: result.providerId,
+          deliveredAt: result.status === "sent" ? new Date() : null,
+        },
+      });
+    }
+  }
 
   revalidatePath("/notifications");
   revalidatePath("/staff/notifications");

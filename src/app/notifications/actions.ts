@@ -9,25 +9,29 @@ import { activeNotificationWhere, setNotificationReceipt } from "@/lib/notificat
 const idSchema = z.string().cuid();
 
 async function ensureActiveNotification(notificationId: string) {
+  const session = await requireAuth();
   const notification = await prisma.siteNotification.findFirst({
-    where: { id: notificationId, ...activeNotificationWhere() },
+    where: {
+      id: notificationId,
+      ...activeNotificationWhere(),
+      OR: [{ audience: "all" }, { targets: { some: { userId: session.user.id } } }],
+    },
     select: { id: true },
   });
   if (!notification) throw new Error("Notification not found");
+  return session;
 }
 
 export async function markNotificationRead(formData: FormData) {
-  const session = await requireAuth();
   const notificationId = idSchema.parse(formData.get("notificationId"));
-  await ensureActiveNotification(notificationId);
+  const session = await ensureActiveNotification(notificationId);
   await setNotificationReceipt(notificationId, session.user.id, { readAt: new Date() });
   revalidatePath("/notifications");
 }
 
 export async function dismissNotification(formData: FormData) {
-  const session = await requireAuth();
   const notificationId = idSchema.parse(formData.get("notificationId"));
-  await ensureActiveNotification(notificationId);
+  const session = await ensureActiveNotification(notificationId);
   const now = new Date();
   await setNotificationReceipt(notificationId, session.user.id, { readAt: now, dismissedAt: now });
   revalidatePath("/notifications");
@@ -36,7 +40,10 @@ export async function dismissNotification(formData: FormData) {
 export async function markAllNotificationsRead() {
   const session = await requireAuth();
   const notifications = await prisma.siteNotification.findMany({
-    where: activeNotificationWhere(),
+    where: {
+      ...activeNotificationWhere(),
+      OR: [{ audience: "all" }, { targets: { some: { userId: session.user.id } } }],
+    },
     select: { id: true },
   });
   if (notifications.length === 0) return;

@@ -13,9 +13,16 @@ type Message = {
   sender: { id: string; name?: string | null; image?: string | null };
 };
 
+type Feedback = {
+  fromUserId: string;
+  rating: number;
+  comment?: string | null;
+};
+
 type ConvInfo = {
   id: string;
-  listing: { id: string; title: string; price: number };
+  kind: string;
+  listing: { id: string; title: string; price: number } | null;
   buyer: { id: string; name?: string | null };
   seller: { id: string; name?: string | null };
 };
@@ -31,7 +38,6 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
   const [id, setId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // feedback state
   const [myFeedback, setMyFeedback] = useState<{ rating: number; comment: string } | null>(null);
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackComment, setFeedbackComment] = useState("");
@@ -47,19 +53,21 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
     Promise.all([
       fetch(`/api/conversations/${id}/messages`).then((r) => r.json()),
       fetch(`/api/conversations/${id}`).then((r) => r.json()),
-    ]).then(([msgs, convData]) => {
-      setMessages(msgs);
-      setConv(convData);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    ])
+      .then(([msgs, convData]) => {
+        setMessages(msgs);
+        setConv(convData);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
-    if (!id || !session?.user?.id || !conv) return;
+    if (!id || !session?.user?.id || !conv?.listing) return;
     fetch(`/api/feedback?listingId=${conv.listing.id}&toUserId=${session.user.id}`)
       .then((r) => r.json())
-      .then((data) => {
-        const mine = data.feedback?.find((f: any) => f.fromUserId === session.user!.id);
+      .then((data: { feedback?: Feedback[] }) => {
+        const mine = data.feedback?.find((item) => item.fromUserId === session.user!.id);
         if (mine) setMyFeedback({ rating: mine.rating, comment: mine.comment || "" });
       })
       .catch(() => {});
@@ -87,7 +95,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
 
   async function handleFeedbackSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!feedbackRating || !conv) return;
+    if (!feedbackRating || !conv?.listing) return;
     setSubmittingFeedback(true);
     setFeedbackError("");
 
@@ -115,13 +123,13 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-lg mt-16 px-4 text-center">
+      <div className="mx-auto mt-16 max-w-lg px-4 text-center">
         <p className="text-zinc-400">Sign in to view messages.</p>
       </div>
     );
   }
 
-  if (loading) return <div className="text-center py-16 text-zinc-500">Loading...</div>;
+  if (loading) return <div className="py-16 text-center text-zinc-500">Loading...</div>;
 
   const otherPerson = conv
     ? session.user!.id === conv.seller.id ? conv.buyer : conv.seller
@@ -131,31 +139,38 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <button
         onClick={() => router.push("/messages")}
-        className="text-sm text-emerald-600 hover:underline mb-4"
+        className="mb-4 text-sm text-emerald-600 hover:underline"
       >
         &larr; Back to messages
       </button>
 
       {conv && (
-        <p className="text-sm text-zinc-400 mb-4">
-          Conversation with <span className="font-medium text-zinc-200">{otherPerson?.name || "User"}</span> about{" "}
-          <span className="font-medium text-zinc-200">{conv.listing.title}</span>
-        </p>
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold text-zinc-100">{otherPerson?.name || "User"}</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            {conv.listing ? (
+              <>
+                Listing conversation about <span className="font-medium text-zinc-200">{conv.listing.title}</span>
+              </>
+            ) : (
+              "Direct member message"
+            )}
+          </p>
+        </div>
       )}
 
       <div className="rounded-xl border border-border bg-surface">
-        <div className="h-[50vh] overflow-y-auto p-4 space-y-3">
+        <div className="h-[50vh] space-y-3 overflow-y-auto p-4">
+          {messages.length === 0 && (
+            <div className="py-12 text-center text-sm text-zinc-600">No messages yet. Start the conversation below.</div>
+          )}
           {messages.map((msg) => {
             const isMe = msg.senderId === session.user!.id;
             return (
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                    isMe ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-100"
-                  }`}
-                >
+                <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${isMe ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-100"}`}>
                   <p className="text-sm">{msg.content}</p>
-                  <p className={`text-xs mt-1 ${isMe ? "text-emerald-200" : "text-zinc-400"}`}>
+                  <p className={`mt-1 text-xs ${isMe ? "text-emerald-200" : "text-zinc-400"}`}>
                     {formatRelativeTime(msg.createdAt)}
                   </p>
                 </div>
@@ -165,7 +180,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t border-border p-4 flex gap-2">
+        <div className="flex gap-2 border-t border-border p-4">
           <input
             value={newMsg}
             onChange={(e) => setNewMsg(e.target.value)}
@@ -183,15 +198,14 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
         </div>
       </div>
 
-      {/* Feedback */}
-      {conv && (
+      {conv?.listing && (
         <div className="mt-8 rounded-xl border border-border bg-surface p-5">
-          <h3 className="text-sm font-semibold mb-3">Leave feedback</h3>
+          <h3 className="mb-3 text-sm font-semibold">Leave feedback</h3>
           {myFeedback ? (
             <div className="text-sm text-zinc-400">
-              <p>You rated {otherPerson?.name || "User"}: <span className="text-amber-500">{'★'.repeat(myFeedback.rating)}</span></p>
+              <p>You rated {otherPerson?.name || "User"}: <span className="text-amber-500">{"*".repeat(myFeedback.rating)}</span></p>
               {myFeedback.comment && <p className="mt-1 text-zinc-500">{myFeedback.comment}</p>}
-              <p className="text-xs text-zinc-400 mt-2">Feedback can only be left once per listing.</p>
+              <p className="mt-2 text-xs text-zinc-400">Feedback can only be left once per listing.</p>
             </div>
           ) : (
             <form onSubmit={handleFeedbackSubmit} className="space-y-3">
@@ -201,9 +215,9 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
                     key={star}
                     type="button"
                     onClick={() => setFeedbackRating(star)}
-                    className={`text-xl ${star <= feedbackRating ? "text-amber-500" : "text-zinc-600"} hover:text-amber-400 transition`}
+                    className={`text-xl ${star <= feedbackRating ? "text-amber-500" : "text-zinc-600"} transition hover:text-amber-400`}
                   >
-                    ★
+                    *
                   </button>
                 ))}
               </div>
@@ -212,7 +226,7 @@ export default function ChatPage(props: { params: Promise<{ id: string }> }) {
                 onChange={(e) => setFeedbackComment(e.target.value)}
                 rows={2}
                 placeholder="Comment (optional)"
-                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-emerald-500 resize-y"
+                className="w-full resize-y rounded-lg border px-3 py-2 text-sm outline-none focus:border-emerald-500"
               />
               {feedbackError && <p className="text-xs text-red-600">{feedbackError}</p>}
               <button

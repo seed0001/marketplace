@@ -136,7 +136,7 @@ export default async function SellerStudioPage() {
               <div className="mt-3 space-y-1">
                 {context.conversations.slice(0, 4).map((conversation) => (
                   <Link href={`/messages/${conversation.id}`} key={conversation.id} className="block rounded-xl px-2 py-2.5 hover:bg-white/[.04]">
-                    <div className="truncate text-xs text-zinc-300">{conversation.buyer.name || "Buyer"} · {conversation.listing.title}</div>
+                    <div className="truncate text-xs text-zinc-300">{conversation.buyer.name || "Member"} · {conversation.listing?.title || "Direct message"}</div>
                     <div className="mt-1 truncate text-[10px] text-zinc-600">{conversation.messages[0]?.content || "New inquiry"}</div>
                   </Link>
                 ))}

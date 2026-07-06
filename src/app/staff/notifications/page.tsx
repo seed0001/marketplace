@@ -2,7 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
 import { formatRelativeTime } from "@/lib/utils";
-import { archiveSiteNotification, publishSiteNotification } from "./actions";
+import { isSmsConfigured } from "@/lib/sms";
+import { archiveSiteNotification } from "./actions";
+import { StaffMessageComposer } from "./StaffMessageComposer";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,7 @@ export default async function StaffNotificationsPage({
   const notice = statusMessage(params.status);
   const now = new Date();
 
-  const [activeCount, urgentCount, totalReceipts, notifications] = await Promise.all([
+  const [activeCount, urgentCount, totalReceipts, notifications, members, smsReadyCount, smsDeliveryCount] = await Promise.all([
     prisma.siteNotification.count({
       where: {
         archivedAt: null,
@@ -63,10 +65,18 @@ export default async function StaffNotificationsPage({
       take: 40,
       include: {
         createdBy: { select: { name: true, email: true } },
-        _count: { select: { receipts: true } },
+        _count: { select: { receipts: true, targets: true, deliveries: true } },
       },
     }),
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 500,
+      select: { id: true, name: true, email: true, phoneNumber: true, phoneNotificationsEnabled: true },
+    }),
+    prisma.user.count({ where: { phoneNumber: { not: null }, phoneNotificationsEnabled: true } }),
+    prisma.siteNotificationDelivery.count({ where: { channel: "sms" } }),
   ]);
+  const smsConfigured = isSmsConfigured();
 
   return (
     <div className="min-h-screen bg-[#07090a] text-zinc-100">
@@ -94,71 +104,28 @@ export default async function StaffNotificationsPage({
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric label="Live notices" value={number.format(activeCount)} detail="Visible to signed-in users" />
           <Metric label="Urgent notices" value={number.format(urgentCount)} detail="Maintenance or high-priority items" />
           <Metric label="User actions" value={number.format(totalReceipts)} detail="Read and dismiss receipts all time" />
+          <Metric label="SMS ready" value={number.format(smsReadyCount)} detail={smsConfigured ? `${smsDeliveryCount} SMS attempts logged` : "Provider not configured"} />
         </div>
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
           <section className="rounded-2xl border border-white/10 bg-white/[.025] p-6">
-            <h2 className="font-semibold">Publish a sitewide notification</h2>
+            <h2 className="font-semibold">Send a message</h2>
             <p className="mt-1 text-xs leading-5 text-zinc-600">
-              New notices appear in the navbar Updates menu and the full notification inbox for every signed-in member.
+              Send to every member or pick specific recipients. Web notifications always appear in Updates; SMS is attempted for opted-in phone numbers when configured.
             </p>
-
-            <form action={publishSiteNotification} className="mt-5 space-y-4">
-              <div>
-                <label htmlFor="title" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Title</label>
-                <input id="title" name="title" required maxLength={120} placeholder="Scheduled maintenance tonight" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-              </div>
-
-              <div>
-                <label htmlFor="body" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Message</label>
-                <textarea id="body" name="body" required maxLength={3000} rows={7} placeholder="Tell members what changed, what they should expect, and whether any action is needed." className="mt-2 w-full resize-y rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm leading-6 outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="category" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Category</label>
-                  <select id="category" name="category" defaultValue="update" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-emerald-400/50">
-                    <option value="update">Update</option>
-                    <option value="feature">Feature</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="policy">Policy</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="priority" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Priority</label>
-                  <select id="priority" name="priority" defaultValue="normal" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-emerald-400/50">
-                    <option value="normal">Normal</option>
-                    <option value="important">Important</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="linkLabel" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Link label</label>
-                  <input id="linkLabel" name="linkLabel" maxLength={80} placeholder="View details" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-                </div>
-                <div>
-                  <label htmlFor="linkHref" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Link path or URL</label>
-                  <input id="linkHref" name="linkHref" maxLength={500} placeholder="/seller/studio" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="expiresAt" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Expires at</label>
-                <input id="expiresAt" name="expiresAt" type="datetime-local" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-emerald-400/50" />
-                <p className="mt-2 text-[11px] text-zinc-600">Leave blank for a persistent announcement that staff can archive manually.</p>
-              </div>
-
-              <button className="w-full rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-300">
-                Publish notification
-              </button>
-            </form>
+            <StaffMessageComposer
+              smsConfigured={smsConfigured}
+              members={members.map((member) => ({
+                id: member.id,
+                label: member.name || member.email,
+                email: member.email,
+                phoneReady: Boolean(member.phoneNumber && member.phoneNotificationsEnabled),
+              }))}
+            />
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/[.025] p-6">
@@ -193,7 +160,9 @@ export default async function StaffNotificationsPage({
                         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-zinc-700">
                           <span>Published {formatRelativeTime(notification.createdAt)}</span>
                           <span>By {notification.createdBy?.name || notification.createdBy?.email || "Staff"}</span>
+                          <span>{notification.audience === "all" ? "Everyone" : `${number.format(notification._count.targets)} recipients`}</span>
                           <span>{number.format(notification._count.receipts)} user actions</span>
+                          <span>{number.format(notification._count.deliveries)} SMS logs</span>
                           {notification.expiresAt && <span>Expires {formatRelativeTime(notification.expiresAt)}</span>}
                         </div>
                       </div>

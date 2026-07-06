@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { DirectMessageButton } from "@/components/DirectMessageButton";
+import { ProfileContactSettings } from "@/components/ProfileContactSettings";
 import { WebsiteShowcaseEditor } from "@/components/WebsiteShowcaseEditor";
 import type { Portfolio as PortfolioData } from "@/lib/portfolio";
 import { formatPrice, formatDate, formatRelativeTime } from "@/lib/utils";
@@ -78,8 +80,16 @@ export function Portfolio({
           <p className="mt-2 text-xs text-zinc-500">
             This portfolio is generated automatically from real marketplace activity.
           </p>
+          {!isOwner && <div className="mt-4"><DirectMessageButton recipientId={user.id} /></div>}
         </div>
       </div>
+
+      {isOwner && (
+        <ProfileContactSettings
+          initialPhoneNumber={user.phoneNumber}
+          initialPhoneNotificationsEnabled={user.phoneNotificationsEnabled}
+        />
+      )}
 
       {/* Seller websites */}
       <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">

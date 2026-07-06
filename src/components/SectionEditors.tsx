@@ -22,7 +22,7 @@ export function SectionEditors({ sections, onChange, filter }: Props) {
 
   return (
     <div className="space-y-8">
-      {filtered.map((section, i) => {
+      {filtered.map((section) => {
         const actualIndex = sections.indexOf(section);
         return (
           <fieldset key={section.id}>

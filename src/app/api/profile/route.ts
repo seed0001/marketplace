@@ -12,14 +12,23 @@ function isValidImage(value: unknown): value is string {
   );
 }
 
-// The portfolio itself is system-generated and read-only; the profile photo is
-// the one thing the user controls, so it gets its own tightly-scoped endpoint.
+function normalizePhone(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const cleaned = trimmed.replace(/[^\d+]/g, "");
+  if (!/^\+?\d{10,15}$/.test(cleaned)) return null;
+  return cleaned.startsWith("+") ? cleaned : `+1${cleaned}`;
+}
+
+// The portfolio itself is system-generated and mostly read-only; this endpoint
+// covers private profile settings such as photo and phone notification opt-in.
 export async function PATCH(request: NextRequest) {
   try {
     const session = await requireAuth();
     const body = await request.json();
 
-    const data: { image?: string | null } = {};
+    const data: { image?: string | null; phoneNumber?: string | null; phoneNotificationsEnabled?: boolean } = {};
 
     if ("image" in body) {
       if (body.image === null || body.image === "") {
@@ -31,6 +40,19 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    if ("phoneNumber" in body) {
+      const phoneNumber = normalizePhone(body.phoneNumber);
+      if (phoneNumber === null) {
+        return NextResponse.json({ error: "Enter a valid phone number with area code." }, { status: 400 });
+      }
+      data.phoneNumber = phoneNumber || null;
+      if (!phoneNumber) data.phoneNotificationsEnabled = false;
+    }
+
+    if ("phoneNotificationsEnabled" in body) {
+      data.phoneNotificationsEnabled = Boolean(body.phoneNotificationsEnabled);
+    }
+
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
     }
@@ -38,7 +60,7 @@ export async function PATCH(request: NextRequest) {
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data,
-      select: { id: true, name: true, image: true },
+      select: { id: true, name: true, image: true, phoneNumber: true, phoneNotificationsEnabled: true },
     });
 
     return NextResponse.json(user);

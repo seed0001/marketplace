@@ -8,10 +8,9 @@ export type NotificationPriority = (typeof notificationPriorities)[number];
 
 export function activeNotificationWhere(now = new Date()) {
   return {
-    audience: "all",
     archivedAt: null,
     startsAt: { lte: now },
-    OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+    AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }],
   };
 }
 
@@ -23,7 +22,10 @@ function priorityRank(priority: string) {
 
 export async function getUserNotifications(userId: string, take = 20) {
   const notifications = await prisma.siteNotification.findMany({
-    where: activeNotificationWhere(),
+    where: {
+      ...activeNotificationWhere(),
+      OR: [{ audience: "all" }, { targets: { some: { userId } } }],
+    },
     orderBy: { startsAt: "desc" },
     take: Math.max(take, 100),
     include: {

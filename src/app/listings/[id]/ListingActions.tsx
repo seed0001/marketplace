@@ -7,11 +7,9 @@ import { useState } from "react";
 
 export function ListingActions({
   listingId,
-  sellerId,
   isOwner,
 }: {
   listingId: string;
-  sellerId: string;
   isOwner: boolean;
 }) {
   const { data: session } = useSession();

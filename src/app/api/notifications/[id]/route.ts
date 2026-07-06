@@ -20,7 +20,11 @@ export async function PATCH(
     if (!parsed.success) return NextResponse.json({ error: "Invalid notification action" }, { status: 400 });
 
     const notification = await prisma.siteNotification.findFirst({
-      where: { id, ...activeNotificationWhere() },
+      where: {
+        id,
+        ...activeNotificationWhere(),
+        OR: [{ audience: "all" }, { targets: { some: { userId: session.user.id } } }],
+      },
       select: { id: true },
     });
     if (!notification) return NextResponse.json({ error: "Not found" }, { status: 404 });
