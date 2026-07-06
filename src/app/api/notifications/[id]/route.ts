@@ -4,13 +4,14 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-helpers";
 import { activeNotificationWhere, setNotificationReceipt } from "@/lib/notifications";
+import { publicUrl } from "@/lib/public-url";
 
 const actionSchema = z.object({
   action: z.enum(["read", "dismiss"]),
 });
 
 function redirectToInbox(request: NextRequest) {
-  return NextResponse.redirect(new URL("/notifications", request.url), { status: 303 });
+  return NextResponse.redirect(publicUrl("/notifications", request), { status: 303 });
 }
 
 async function updateNotification(id: string, action: "read" | "dismiss") {
@@ -66,6 +67,6 @@ export async function POST(
     if (parsed.success) await updateNotification(id, parsed.data.action);
     return redirectToInbox(request);
   } catch {
-    return NextResponse.redirect(new URL("/auth/signin?callbackUrl=/notifications", request.url), { status: 303 });
+    return NextResponse.redirect(publicUrl("/auth/signin?callbackUrl=/notifications", request), { status: 303 });
   }
 }
