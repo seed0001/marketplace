@@ -3,7 +3,10 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
-export const OWNER_EMAIL = "travisbollenbach@gmail.com";
+// The platform owner's login email. Overridable via the OWNER_EMAIL env var so
+// owner identity is configuration, not code; defaults to Brandon's account.
+// Kept lowercase because role checks compare against `email.toLowerCase()`.
+export const OWNER_EMAIL = (process.env.OWNER_EMAIL || "bbrumbaugh13@gmail.com").toLowerCase();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
