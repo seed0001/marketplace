@@ -97,28 +97,14 @@ export function StaffMessageComposer({ members, smsConfigured }: { members: Memb
         )}
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="linkLabel" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Link label</label>
-          <input id="linkLabel" name="linkLabel" maxLength={80} placeholder="View details" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-        </div>
-        <div>
-          <label htmlFor="linkHref" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Link path or URL</label>
-          <input id="linkHref" name="linkHref" maxLength={500} placeholder="/seller/studio" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none placeholder:text-zinc-700 focus:border-emerald-400/50" />
-        </div>
+      <div>
+        <label htmlFor="expiresAt" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Expires at</label>
+        <input id="expiresAt" name="expiresAt" type="datetime-local" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-emerald-400/50" />
+        <p className="mt-2 text-[11px] text-zinc-600">Leave blank if the message should stay active until staff archives it.</p>
       </div>
-
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
-        <div>
-          <label htmlFor="expiresAt" className="text-xs font-semibold uppercase tracking-[.15em] text-zinc-500">Expires at</label>
-          <input id="expiresAt" name="expiresAt" type="datetime-local" className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-emerald-400/50" />
-        </div>
-        <label className="mt-6 flex items-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-sm text-zinc-300">
-          <input name="sendSms" type="checkbox" className="h-4 w-4 accent-emerald-500" />
-          Try SMS
-        </label>
-      </div>
-      {!smsConfigured && <p className="text-[11px] text-amber-300">SMS will be skipped until Twilio environment variables are configured. Web notifications still send.</p>}
+      <p className={`text-[11px] ${smsConfigured ? "text-sky-300" : "text-amber-300"}`}>
+        {smsConfigured ? "SMS-ready members will also receive this automatically." : "SMS is not configured, so this will send as a website notification only."}
+      </p>
 
       <button className="w-full rounded-xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-300">
         Send message

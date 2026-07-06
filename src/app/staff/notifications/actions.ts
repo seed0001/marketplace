@@ -6,15 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
 import { notificationCategories, notificationPriorities } from "@/lib/notifications";
-import { sendSmsNotification } from "@/lib/sms";
-
-const hrefSchema = z
-  .string()
-  .trim()
-  .max(500)
-  .refine((value) => !value || value.startsWith("/") || value.startsWith("https://") || value.startsWith("http://"), {
-    message: "Use a site path or full URL.",
-  });
+import { isSmsConfigured, sendSmsNotification } from "@/lib/sms";
 
 const notificationSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -23,9 +15,6 @@ const notificationSchema = z.object({
   priority: z.enum(notificationPriorities),
   audience: z.enum(["all", "selected"]),
   recipientIds: z.array(z.string().cuid()).default([]),
-  sendSms: z.boolean().default(false),
-  linkLabel: z.string().trim().max(80).optional(),
-  linkHref: hrefSchema.optional(),
   expiresAt: z.string().trim().optional(),
 });
 
@@ -51,9 +40,6 @@ export async function publishSiteNotification(formData: FormData) {
     priority: formData.get("priority"),
     audience: formData.get("audience") === "selected" ? "selected" : "all",
     recipientIds: formData.getAll("recipientIds"),
-    sendSms: formData.get("sendSms") === "on",
-    linkLabel: formData.get("linkLabel") || undefined,
-    linkHref: formData.get("linkHref") || undefined,
     expiresAt: formData.get("expiresAt") || undefined,
   });
 
@@ -71,8 +57,8 @@ export async function publishSiteNotification(formData: FormData) {
       category: data.category,
       priority: data.priority,
       audience: data.audience,
-      linkLabel: data.linkLabel || null,
-      linkHref: data.linkHref || null,
+      linkLabel: null,
+      linkHref: null,
       expiresAt,
       createdById: staff.id,
       targets: data.audience === "selected" ? {
@@ -84,7 +70,7 @@ export async function publishSiteNotification(formData: FormData) {
     },
   });
 
-  if (data.sendSms) {
+  if (isSmsConfigured()) {
     const smsRecipients = await prisma.user.findMany({
       where: {
         phoneNotificationsEnabled: true,
@@ -94,7 +80,7 @@ export async function publishSiteNotification(formData: FormData) {
       select: { id: true, phoneNumber: true },
     });
 
-    const smsBody = `${data.title}\n\n${data.body}${data.linkHref ? `\n\n${data.linkHref}` : ""}`;
+    const smsBody = `${data.title}\n\n${data.body}`;
     for (const recipient of smsRecipients) {
       const result = await sendSmsNotification(recipient.phoneNumber, smsBody);
       await prisma.siteNotificationDelivery.create({
