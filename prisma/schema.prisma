@@ -47,6 +47,7 @@ model User {
   notificationReceipts SiteNotificationReceipt[]
   notificationTargets  SiteNotificationRecipient[]
   notificationDeliveries SiteNotificationDelivery[]
+  listingCreationEvents ListingCreationEvent[]
 }
 
 // A personal access token a seller generates so an external client — their
@@ -94,6 +95,21 @@ model SellerApiKeyUsage {
   @@index([route, occurredAt])
   @@index([statusCode, occurredAt])
   @@index([occurredAt])
+}
+
+// Append-only ledger of listing creations, one row per successful create,
+// powering the anti-spam cooldown (max N new listings per rolling window).
+// Deliberately NOT derived from live Listing rows: deleting a listing must not
+// refund the quota, or an abuser could churn (post, delete, repost) forever.
+// Rows older than the window are pruned opportunistically on each check.
+model ListingCreationEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 // Admin-managed catalog of carrier email-to-SMS gateways. SMS is delivered by

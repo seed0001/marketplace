@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth-helpers";
 import { sanitizeImages } from "@/lib/utils";
 import { auth } from "@/lib/auth";
 import { queueDiscordEvent } from "@/lib/discord";
+import { createListingRateLimited, rateLimitMessage } from "@/lib/listing-rate-limit";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -63,21 +64,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const listing = await prisma.listing.create({
-      data: {
-        title,
-        description: description ?? "",
-        price: parseFloat(price),
-        images: sanitizeImages(images),
-        category: category || null,
-        condition: condition || null,
-        sections: sections || undefined,
-        readme: readme || undefined,
-        adult: adult ?? false,
-        userId: session.user.id,
-      },
-      include: { user: { select: { id: true, name: true, image: true } } },
-    });
+    // Anti-spam cooldown: caps how fast any account (or a hijacked session)
+    // can publish, so bad content can't flood in faster than staff can react.
+    const result = await createListingRateLimited(session.user.id, (tx) =>
+      tx.listing.create({
+        data: {
+          title,
+          description: description ?? "",
+          price: parseFloat(price),
+          images: sanitizeImages(images),
+          category: category || null,
+          condition: condition || null,
+          sections: sections || undefined,
+          readme: readme || undefined,
+          adult: adult ?? false,
+          userId: session.user.id,
+        },
+        include: { user: { select: { id: true, name: true, image: true } } },
+      })
+    );
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: rateLimitMessage(result.retryAfterSeconds) },
+        { status: 429, headers: { "Retry-After": String(result.retryAfterSeconds) } }
+      );
+    }
+
+    const listing = result.value;
     await queueDiscordEvent("marketplace", `New listing · ${listing.title}`, {
       description: listing.description || "A new marketplace listing was published.",
       color: 0x34d399,

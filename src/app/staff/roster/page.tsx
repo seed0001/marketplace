@@ -4,6 +4,7 @@ import { requireStaff } from "@/lib/staff";
 import { OWNER_EMAIL } from "@/lib/auth";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { RoleControl } from "./RoleControl";
+import { DangerActions } from "./DangerActions";
 
 export const dynamic = "force-dynamic";
 
@@ -151,6 +152,7 @@ export default async function StaffRosterPage({
                 <th className="px-5 py-3 font-semibold text-right">Inquiries sent</th>
                 <th className="px-5 py-3 font-semibold">Joined</th>
                 <th className="px-5 py-3 font-semibold">Last listed</th>
+                {staff.role === "ADMIN" && <th className="px-5 py-3 text-right font-semibold text-red-400/60">Danger</th>}
               </tr>
             </thead>
             <tbody>
@@ -214,6 +216,26 @@ export default async function StaffRosterPage({
                   </td>
                   <td className="px-5 py-4 text-zinc-500">{formatDate(m.createdAt)}</td>
                   <td className="px-5 py-4 text-zinc-500">{m.lastListingAt ? formatRelativeTime(m.lastListingAt) : <span className="text-zinc-700">Never</span>}</td>
+                  {staff.role === "ADMIN" && (
+                    <td className="px-5 py-4 text-right">
+                      <DangerActions
+                        userId={m.id}
+                        name={m.name}
+                        email={m.email}
+                        listingCount={m.totalListings}
+                        locked={m.email.toLowerCase() === OWNER_EMAIL || m.id === staff.id || m.role === "ADMIN"}
+                        lockReason={
+                          m.email.toLowerCase() === OWNER_EMAIL
+                            ? "Platform owner — protected"
+                            : m.id === staff.id
+                              ? "Your own account"
+                              : m.role === "ADMIN"
+                                ? "Demote this administrator first"
+                                : undefined
+                        }
+                      />
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

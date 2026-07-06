@@ -204,7 +204,7 @@ export function ApiKeysManager({ initialKeys, apiBase }: { initialKeys: ApiKey[]
           {[
             { label: "Check the connection", detail: "Confirm the key works and see which account it’s acting on." },
             { label: "List your listings", detail: "Pull all of your listings — any status — to sync or review them." },
-            { label: "Create a listing", detail: "Publish a new listing with title, price, description, images, and more." },
+            { label: "Create a listing", detail: "Publish a new listing with title, price, description, images, and more. Creation is rate limited to 3 new listings per 5 minutes — over the limit, the API returns 429 with a Retry-After header." },
             { label: "Update a listing", detail: "Edit any field, or flip status between active, sold, and draft." },
             { label: "Delete a listing", detail: "Permanently remove one of your listings." },
           ].map((item) => (
