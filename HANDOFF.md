@@ -5,6 +5,103 @@ your agent at this file first.
 
 ---
 
+## 2026-07-06 (later) — Handing back to Brandon
+
+**Status:** Handing back over to **Brandon**.
+
+**Next task (planned below, not started):** Seller phone numbers for SMS
+updates — see "Next up: seller phone number + SMS updates" at the end of this
+entry.
+
+### What we did this session
+
+- **Picked up Brandon's `TRAVIS_RAILWAY_INSTRUCTIONS.md`** and completed the
+  two repo-side items (PR #12, merged):
+  - Owner identity is now env-driven: `OWNER_EMAIL` env var, defaulting to
+    Brandon's account (`bbrumbaugh13@gmail.com`) — no more hardcoded owner in
+    `src/lib/auth.ts`.
+  - `.github/workflows/deploy.yml` now triggers on `master` (was `main`, so it
+    had never run).
+
+- **SMS without Twilio (feature).** SMS now rides on the email provider
+  (Resend) via carrier **email-to-SMS gateways** — emailing
+  `<10-digit-number>@<gateway>` (e.g. `vtext.com`) delivers as a text. No
+  second provider account.
+  - `src/lib/email.ts` gained a shared `sendProviderEmail()`; `src/lib/sms.ts`
+    sends through the user's stored gateway domain. `isSmsConfigured()` ===
+    email configured.
+  - **Configurable carrier catalog**: new `SmsGateway` table managed at
+    `/staff/sms-gateways` (add/enable/disable/remove/restore defaults), with a
+    built-in default list as fallback when the table is empty.
+  - Users pick a carrier on their profile **or choose "Other" and type any
+    gateway domain** — odd/regional carriers work without a code change. The
+    gateway domain is stored per user in `User.phoneCarrier`.
+
+- **Abuse containment (feature).** Defense against a leaked/abused API key
+  mass-publishing bad listings:
+  - **Cooldown: max 3 new listings per rolling 5 minutes, all roles**, on both
+    creation paths (`/api/listings` and `/api/v1/listings`); over-limit → 429 +
+    `Retry-After`. Quota counts an append-only `ListingCreationEvent` ledger
+    (deleting listings doesn't refund quota) and the check+create runs behind a
+    per-user Postgres advisory lock (parallel scripted requests can't race past
+    the cap).
+  - **Admin "Danger" tools on `/staff/roster`**: *Purge catalog* (delete every
+    listing + revoke all API keys, one transaction) and *Delete account* (full
+    cascade delete; pre-checks the moderation-audit `Restrict` constraint;
+    requires typing the member's email). Guards: never the owner, yourself, or
+    an ADMIN. Both audited + Discord alerts.
+
+- **Railway/env status (Travis's side, in progress):** `AUTH_SECRET`,
+  `AUTH_URL`, `DATABASE_URL` are set in Railway. Still pending:
+  `RESEND_API_KEY` + `EMAIL_FROM` (Travis has the key; goes in Railway service
+  Variables, **not** the repo), Resend **domain verification** for
+  `vibemarket.biz` (DNS records at the domain provider), and OpenRouter vars.
+  Once the Resend vars land, **both email and SMS alerts turn on** — SMS needs
+  no extra config. Twilio vars are no longer needed at all.
+
+### Next up: seller phone number + SMS updates (plan for Brandon)
+
+Goal: sellers can provide a phone number to get SMS updates; later, more SMS
+features (reminders, etc.).
+
+**What already exists — don't rebuild:** `User.phoneNumber`,
+`User.phoneCarrier` (gateway domain), `User.phoneNotificationsEnabled`,
+`User.phoneVerifiedAt` (in schema but **never set** — verification was never
+built), the profile "Contact and notifications" form
+(`ProfileContactSettings`), send plumbing (`lib/sms.ts` over Resend), and
+delivery logging for staff broadcasts (`SiteNotificationDelivery`).
+
+**Plan:**
+
+1. **Surface it for sellers.** The phone form lives only on the profile page
+   today. Add a "Get SMS updates" prompt where sellers actually work: Seller
+   Studio sidebar (and/or the API-keys page), reusing `ProfileContactSettings`
+   or a slim variant. Show it only when no verified number exists.
+2. **Verify the number (recommended before expanding SMS).** Send a short
+   code via the gateway ("VibeMarket code: 123456"), user enters it, set
+   `phoneVerifiedAt`. This proves number + carrier gateway are right before we
+   depend on them. Store code hash + expiry (new small table or fields);
+   rate-limit attempts (reuse the advisory-lock pattern from
+   `lib/listing-rate-limit.ts`). Send SMS only to verified numbers once this
+   ships.
+3. **Per-event preferences.** Today SMS only fires for staff broadcasts. Add
+   seller-facing toggles (e.g. new buyer inquiry, new message, review/feedback
+   received, security alerts like "new API key created") — either boolean
+   columns or a JSON prefs blob on `User`.
+4. **Wire the triggers.** Call `sendSmsNotification()` from the events chosen
+   in (3) — conversation/message creation is the high-value one. Log every
+   send: generalize `SiteNotificationDelivery` (nullable `notificationId`) or
+   add a small `SmsDelivery` table.
+5. **Throttle.** Cap SMS per user per day and keep bodies short — carrier
+   gateways are best-effort and will filter chatty senders. Consider quiet
+   hours.
+6. **Later: reminders/scheduled SMS.** Needs a scheduler (Railway cron hitting
+   an authenticated route, or an in-app queue) — separate milestone.
+
+Suggested order: 1 → 2 → 3 → 4 (one milestone), 5 alongside 4, 6 later.
+
+---
+
 ## 2026-07-06 — Handing back to Brandon
 
 **Status:** Handing this back over to **Brandon**. He's about to push some
