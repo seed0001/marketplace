@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/staff";
+import { OWNER_EMAIL } from "@/lib/auth";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
+import { RoleControl } from "./RoleControl";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +94,8 @@ export default async function StaffRosterPage({
             <h1 className="mt-1 text-2xl font-semibold">Everyone who signed up</h1>
             <p className="mt-2 max-w-2xl text-sm text-zinc-500">
               The full membership, split by who has actually posted something for sale versus who signed up and is only
-              looking around. Signed in as {staff.name || staff.email}.
+              looking around.{staff.role === "ADMIN" ? " Set each member's permission level in the Role column." : ""} Signed
+              in as {staff.name || staff.email}.
             </p>
           </div>
           <div className="flex gap-2">
@@ -138,10 +141,11 @@ export default async function StaffRosterPage({
         </form>
 
         <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10">
-          <table className="w-full min-w-[820px] border-collapse text-sm">
+          <table className="w-full min-w-[960px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-white/10 text-left text-[11px] uppercase tracking-wider text-zinc-600">
                 <th className="px-5 py-3 font-semibold">Member</th>
+                <th className="px-5 py-3 font-semibold">Role</th>
                 <th className="px-5 py-3 font-semibold">Segment</th>
                 <th className="px-5 py-3 font-semibold text-right">Listings</th>
                 <th className="px-5 py-3 font-semibold text-right">Inquiries sent</th>
@@ -163,10 +167,29 @@ export default async function StaffRosterPage({
                         </Link>
                         <div className="truncate text-xs text-zinc-600">{m.email}</div>
                       </div>
-                      {m.role !== "MEMBER" && (
-                        <span className="rounded-full bg-violet-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-violet-300">{m.role.toLowerCase()}</span>
-                      )}
                     </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    {staff.role === "ADMIN" ? (
+                      <RoleControl
+                        userId={m.id}
+                        role={m.role}
+                        locked={m.email.toLowerCase() === OWNER_EMAIL || m.id === staff.id}
+                        lockReason={
+                          m.email.toLowerCase() === OWNER_EMAIL
+                            ? "Platform owner — always an administrator"
+                            : m.id === staff.id
+                              ? "You can't change your own role"
+                              : undefined
+                        }
+                      />
+                    ) : (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${m.role === "MEMBER" ? "bg-white/5 text-zinc-500" : "bg-violet-400/10 text-violet-300"}`}
+                      >
+                        {m.role.toLowerCase()}
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-4">
                     {m.isSeller ? (
