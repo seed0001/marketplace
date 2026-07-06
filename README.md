@@ -23,6 +23,8 @@ a deal.
 - **Accounts** — email/password authentication via NextAuth.
 - **Direct messaging** — buyers and sellers message each other in-app.
 - **Profiles** — a public profile page for each seller.
+- **Programmatic API** — sellers generate a personal API key so their own app
+  or a local AI agent can create and manage listings via the marketplace API.
 
 ## Tech stack
 
