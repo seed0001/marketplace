@@ -29,7 +29,7 @@ function StatCard({
   sub?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
+    <div className="rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md">
       <div className="text-2xl font-bold tracking-tight">{value}</div>
       <div className="mt-1 text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</div>
       {sub && <div className="mt-1 text-xs text-zinc-400">{sub}</div>}
@@ -55,7 +55,7 @@ function ProfileSongs({
   if (songs.length === 0) return null;
 
   return (
-    <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+    <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Favorite songs</h2>
@@ -115,7 +115,7 @@ export async function Portfolio({
   const themeClass = themeClasses[user.profileTheme] || themeClasses.midnight;
   const pageStyle = user.profileBackgroundImage
     ? {
-        backgroundImage: `linear-gradient(rgba(8,10,10,.82), rgba(8,10,10,.92)), url("${user.profileBackgroundImage}")`,
+        backgroundImage: `linear-gradient(rgba(8,10,10,.34), rgba(8,10,10,.62)), url("${user.profileBackgroundImage}")`,
         backgroundSize: "cover",
         backgroundPosition: "center top",
         backgroundAttachment: "fixed",
@@ -123,18 +123,18 @@ export async function Portfolio({
     : undefined;
 
   return (
-    <div className="min-h-screen" style={pageStyle}>
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className={`min-h-screen ${user.profileBackgroundImage ? "" : `bg-gradient-to-br ${themeClass}`}`} style={pageStyle}>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       {/* Identity */}
       {user.profileCoverImage && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={user.profileCoverImage}
           alt=""
-          className="mb-0 h-48 w-full rounded-t-3xl border border-b-0 border-white/10 object-cover sm:h-60"
+          className="mb-0 h-64 w-full rounded-t-3xl border border-b-0 border-white/15 object-cover shadow-2xl shadow-black/30 sm:h-80"
         />
       )}
-      <div className={`flex flex-col items-center gap-3 rounded-b-3xl border border-white/10 bg-gradient-to-br p-5 text-center shadow-2xl shadow-black/20 sm:flex-row sm:items-end sm:gap-6 sm:p-6 sm:text-left ${themeClass} ${user.profileCoverImage ? "mb-10 rounded-t-none" : "mb-10 rounded-t-3xl"}`} style={{ borderColor: `${accentColor}55` }}>
+      <div className={`flex flex-col items-center gap-3 rounded-b-3xl border border-white/15 bg-gradient-to-br p-5 text-center shadow-2xl shadow-black/30 backdrop-blur-md sm:flex-row sm:items-end sm:gap-6 sm:p-6 sm:text-left ${themeClass} ${user.profileCoverImage ? "mb-10 rounded-t-none" : "mb-10 rounded-t-3xl"}`} style={{ borderColor: `${accentColor}66` }}>
         {isOwner ? (
           <AvatarUpload name={user.name} image={user.image} />
         ) : user.image ? (
@@ -218,7 +218,7 @@ export async function Portfolio({
       <ProfileSongs songs={user.profileSongs} accentColor={accentColor} />
 
       {/* Seller websites */}
-      <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+      <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
         {isOwner ? (
           <WebsiteShowcaseEditor initialWebsites={user.websites} />
         ) : (
@@ -277,11 +277,11 @@ export async function Portfolio({
         <section className="mb-12">
           <h2 className="text-lg font-semibold mb-4">Who&apos;s viewing your work</h2>
           {recentViews.length === 0 ? (
-            <p className="rounded-2xl border border-border bg-surface p-6 text-sm text-zinc-500">
+            <p className="rounded-2xl border border-white/15 bg-black/45 p-6 text-sm text-zinc-500 shadow-xl shadow-black/20 backdrop-blur-md">
               No views yet. Once people start opening your listings, you&apos;ll see them here.
             </p>
           ) : (
-            <div className="rounded-2xl border border-border bg-surface divide-y divide-border">
+            <div className="divide-y divide-border rounded-2xl border border-white/15 bg-black/45 shadow-xl shadow-black/20 backdrop-blur-md">
               {recentViews.map((v) => (
                 <div key={v.id} className="flex items-center gap-3 px-4 py-3">
                   {v.viewer?.image ? (
@@ -327,7 +327,7 @@ export async function Portfolio({
         </div>
 
         {listings.length === 0 ? (
-          <p className="rounded-2xl border border-border bg-surface p-6 text-sm text-zinc-500">
+          <p className="rounded-2xl border border-white/15 bg-black/45 p-6 text-sm text-zinc-500 shadow-xl shadow-black/20 backdrop-blur-md">
             No listings yet.
           </p>
         ) : (
@@ -336,7 +336,7 @@ export async function Portfolio({
               <Link
                 key={listing.id}
                 href={`/listings/${listing.id}`}
-                className="group block overflow-hidden rounded-2xl border border-border bg-surface transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                className="group block overflow-hidden rounded-2xl border border-white/15 bg-black/45 shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-emerald-400/40"
               >
                 <div className="aspect-[4/3] bg-zinc-800 overflow-hidden relative">
                   {listing.images[0] ? (
@@ -381,7 +381,7 @@ export async function Portfolio({
           <h2 className="text-lg font-semibold mb-4">What buyers say</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {feedbackReceived.map((f) => (
-              <div key={f.id} className="rounded-2xl border border-border bg-surface p-5">
+              <div key={f.id} className="rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md">
                 <div className="flex items-center gap-2 mb-2">
                   {f.from.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
