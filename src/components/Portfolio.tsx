@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { DirectMessageButton } from "@/components/DirectMessageButton";
 import { ProfileContactSettings } from "@/components/ProfileContactSettings";
+import { ProfileCustomizationEditor } from "@/components/ProfileCustomizationEditor";
 import { WebsiteShowcaseEditor } from "@/components/WebsiteShowcaseEditor";
 import type { Portfolio as PortfolioData } from "@/lib/portfolio";
 import { getSmsGatewayOptions } from "@/lib/sms-gateways";
@@ -36,6 +37,70 @@ function StatCard({
   );
 }
 
+const themeClasses: Record<string, string> = {
+  midnight: "from-zinc-950 via-emerald-950/20 to-black",
+  forest: "from-emerald-950 via-zinc-950 to-lime-950/40",
+  sunset: "from-zinc-950 via-rose-950/30 to-amber-950/30",
+  ocean: "from-slate-950 via-cyan-950/25 to-blue-950/30",
+  violet: "from-zinc-950 via-violet-950/30 to-fuchsia-950/20",
+};
+
+function ProfileSongs({
+  songs,
+  accentColor,
+}: {
+  songs: PortfolioData["user"]["profileSongs"];
+  accentColor: string;
+}) {
+  if (songs.length === 0) return null;
+
+  return (
+    <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">Favorite songs</h2>
+          <p className="mt-1 text-sm text-zinc-500">A five-song profile playlist.</p>
+        </div>
+        <span className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-black" style={{ backgroundColor: accentColor }}>
+          Profile radio
+        </span>
+      </div>
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        {songs.map((song) => (
+          <article key={song.id} className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <div className="border-b border-white/10 px-4 py-3">
+              <h3 className="truncate text-sm font-semibold text-zinc-100">{song.title}</h3>
+              {song.artist && <p className="mt-0.5 truncate text-xs text-zinc-500">{song.artist}</p>}
+            </div>
+            {song.provider === "spotify" ? (
+              <iframe
+                title={`${song.title} on Spotify`}
+                src={song.embedUrl}
+                width="100%"
+                height="152"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="block"
+              />
+            ) : (
+              <iframe
+                title={`${song.title} on YouTube`}
+                src={song.embedUrl}
+                width="100%"
+                height="220"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                loading="lazy"
+                className="block"
+              />
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export async function Portfolio({
   data,
   isOwner,
@@ -46,11 +111,30 @@ export async function Portfolio({
   const { user, listings, stats, feedbackReceived, recentViews } = data;
   // Only the owner sees the contact settings, so only they need the carrier list.
   const smsGateways = isOwner ? await getSmsGatewayOptions() : [];
+  const accentColor = /^#[0-9a-fA-F]{6}$/.test(user.profileAccentColor) ? user.profileAccentColor : "#34d399";
+  const themeClass = themeClasses[user.profileTheme] || themeClasses.midnight;
+  const pageStyle = user.profileBackgroundImage
+    ? {
+        backgroundImage: `linear-gradient(rgba(8,10,10,.82), rgba(8,10,10,.92)), url("${user.profileBackgroundImage}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center top",
+        backgroundAttachment: "fixed",
+      }
+    : undefined;
 
   return (
+    <div className="min-h-screen" style={pageStyle}>
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       {/* Identity */}
-      <div className="flex flex-col items-center text-center gap-3 sm:flex-row sm:text-left sm:items-end sm:gap-6 mb-10">
+      {user.profileCoverImage && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={user.profileCoverImage}
+          alt=""
+          className="mb-0 h-48 w-full rounded-t-3xl border border-b-0 border-white/10 object-cover sm:h-60"
+        />
+      )}
+      <div className={`flex flex-col items-center gap-3 rounded-b-3xl border border-white/10 bg-gradient-to-br p-5 text-center shadow-2xl shadow-black/20 sm:flex-row sm:items-end sm:gap-6 sm:p-6 sm:text-left ${themeClass} ${user.profileCoverImage ? "mb-10 rounded-t-none" : "mb-10 rounded-t-3xl"}`} style={{ borderColor: `${accentColor}55` }}>
         {isOwner ? (
           <AvatarUpload name={user.name} image={user.image} />
         ) : user.image ? (
@@ -68,6 +152,11 @@ export async function Portfolio({
 
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{user.name || "Anonymous builder"}</h1>
+          {user.profileStatus && (
+            <p className="mt-1 inline-flex max-w-full rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs text-zinc-300">
+              {user.profileStatus}
+            </p>
+          )}
           <p className="mt-1 text-sm text-zinc-400">
             Member since {formatDate(stats.memberSince)}
             {stats.reputationAvg != null && (
@@ -80,12 +169,30 @@ export async function Portfolio({
               </>
             )}
           </p>
-          <p className="mt-2 text-xs text-zinc-500">
-            This portfolio is generated automatically from real marketplace activity.
-          </p>
+          {user.profileBio ? (
+            <p className="mt-3 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-zinc-300">{user.profileBio}</p>
+          ) : (
+            <p className="mt-2 text-xs text-zinc-500">
+              This portfolio is generated automatically from real marketplace activity.
+            </p>
+          )}
           {!isOwner && <div className="mt-4"><DirectMessageButton recipientId={user.id} /></div>}
         </div>
       </div>
+
+      {isOwner && (
+        <ProfileCustomizationEditor
+          initialProfile={{
+            profileBio: user.profileBio,
+            profileStatus: user.profileStatus,
+            profileCoverImage: user.profileCoverImage,
+            profileBackgroundImage: user.profileBackgroundImage,
+            profileAccentColor: user.profileAccentColor,
+            profileTheme: user.profileTheme,
+            profileSongs: user.profileSongs,
+          }}
+        />
+      )}
 
       {isOwner && (
         <ProfileContactSettings
@@ -96,6 +203,8 @@ export async function Portfolio({
           gateways={smsGateways}
         />
       )}
+
+      <ProfileSongs songs={user.profileSongs} accentColor={accentColor} />
 
       {/* Seller websites */}
       <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
@@ -288,6 +397,7 @@ export async function Portfolio({
           </div>
         </section>
       )}
+    </div>
     </div>
   );
 }

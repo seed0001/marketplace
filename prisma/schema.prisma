@@ -13,6 +13,12 @@ model User {
   email     String    @unique
   password  String?
   image     String?
+  profileBio String?
+  profileStatus String?
+  profileCoverImage String?
+  profileBackgroundImage String?
+  profileAccentColor String @default("#34d399")
+  profileTheme String @default("midnight")
   phoneNumber String?
   phoneCarrier String?
   phoneNotificationsEnabled Boolean @default(false)
@@ -30,6 +36,7 @@ model User {
   feedbackReceived Feedback[]   @relation("FeedbackTo")
   listingViews  ListingView[]  @relation("ViewerViews")
   websites      SellerWebsite[]
+  profileSongs  ProfileSong[]
   role          UserRole       @default(MEMBER)
   analyticsEvents AnalyticsEvent[]
   sellerAiState    SellerAiState?
@@ -48,6 +55,24 @@ model User {
   notificationTargets  SiteNotificationRecipient[]
   notificationDeliveries SiteNotificationDelivery[]
   listingCreationEvents ListingCreationEvent[]
+}
+
+model ProfileSong {
+  id        String   @id @default(cuid())
+  userId    String
+  provider  String
+  title     String
+  artist    String?
+  url       String
+  embedUrl  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sortOrder])
+  @@index([userId])
 }
 
 // A personal access token a seller generates so an external client — their
