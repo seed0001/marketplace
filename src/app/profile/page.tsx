@@ -21,7 +21,7 @@ export default async function ProfilePage() {
     );
   }
 
-  const data = await getPortfolio(session.user.id, true);
+  const data = await getPortfolio(session.user.id, true, session.user.id);
   if (!data) {
     return (
       <div className="mx-auto max-w-lg mt-16 px-4 text-center">

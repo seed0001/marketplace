@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { DirectMessageButton } from "@/components/DirectMessageButton";
+import { FriendActionButton } from "@/components/FriendActionButton";
 import { ProfileContactSettings } from "@/components/ProfileContactSettings";
 import { ProfileCustomizationEditor } from "@/components/ProfileCustomizationEditor";
 import { WebsiteShowcaseEditor } from "@/components/WebsiteShowcaseEditor";
@@ -101,6 +102,77 @@ function ProfileSongs({
   );
 }
 
+function FriendAvatar({
+  friend,
+}: {
+  friend: PortfolioData["friends"][number] | PortfolioData["pendingFriendRequests"][number];
+}) {
+  return (
+    <Link href={`/users/${friend.id}`} className="group rounded-xl border border-white/10 bg-black/20 p-3 transition hover:border-emerald-400/40">
+      <div className="flex items-center gap-3">
+        {friend.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={friend.image} alt="" className="h-11 w-11 rounded-full object-cover" />
+        ) : (
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-sm font-semibold text-zinc-300">
+            {friend.name?.[0]?.toUpperCase() || "U"}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold text-zinc-100 group-hover:text-emerald-300">{friend.name || "A member"}</div>
+          {friend.profileStatus && <div className="mt-0.5 truncate text-xs text-zinc-500">{friend.profileStatus}</div>}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function ProfileFriends({
+  friends,
+  ownerName,
+}: {
+  friends: PortfolioData["friends"];
+  ownerName: string | null;
+}) {
+  return (
+    <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold">Friends</h2>
+          <p className="mt-1 text-sm text-zinc-500">{friends.length} visible connection{friends.length === 1 ? "" : "s"}.</p>
+        </div>
+      </div>
+      {friends.length === 0 ? (
+        <p className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-500">
+          {ownerName || "This member"} has not added friends yet.
+        </p>
+      ) : (
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {friends.map((friend) => <FriendAvatar key={friend.friendshipId} friend={friend} />)}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PendingFriendRequests({
+  requests,
+}: {
+  requests: PortfolioData["pendingFriendRequests"];
+}) {
+  if (requests.length === 0) return null;
+
+  return (
+    <section className="mb-6 rounded-2xl border border-emerald-400/20 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
+      <h2 className="text-lg font-semibold">Friend requests</h2>
+      <p className="mt-1 text-sm text-zinc-500">Open each profile to accept or decline.</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {requests.map((friend) => <FriendAvatar key={friend.friendshipId} friend={friend} />)}
+      </div>
+    </section>
+  );
+}
+
 export async function Portfolio({
   data,
   isOwner,
@@ -176,7 +248,17 @@ export async function Portfolio({
               This portfolio is generated automatically from real marketplace activity.
             </p>
           )}
-          {!isOwner && <div className="mt-4"><DirectMessageButton recipientId={user.id} /></div>}
+          {!isOwner && data.currentViewerId && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
+              <DirectMessageButton recipientId={user.id} />
+              <FriendActionButton
+                targetUserId={user.id}
+                currentUserId={data.currentViewerId}
+                initialState={data.friendship.state}
+                initialFriendshipId={data.friendship.friendshipId}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -215,7 +297,11 @@ export async function Portfolio({
         />
       )}
 
+      {isOwner && <PendingFriendRequests requests={data.pendingFriendRequests} />}
+
       <ProfileSongs songs={user.profileSongs} accentColor={accentColor} />
+
+      <ProfileFriends friends={data.friends} ownerName={user.name} />
 
       {/* Seller websites */}
       <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
@@ -249,11 +335,16 @@ export async function Portfolio({
       </section>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-12">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 mb-12">
         <StatCard
           label="Listings"
           value={stats.listingsCount}
           sub={`${stats.activeCount} active`}
+        />
+        <StatCard
+          label="Friends"
+          value={data.friends.length}
+          sub={isOwner && data.pendingFriendRequests.length > 0 ? `${data.pendingFriendRequests.length} pending` : "Visible on profile"}
         />
         <StatCard
           label="Total views"

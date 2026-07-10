@@ -37,6 +37,8 @@ model User {
   listingViews  ListingView[]  @relation("ViewerViews")
   websites      SellerWebsite[]
   profileSongs  ProfileSong[]
+  friendRequestsSent Friendship[] @relation("FriendshipRequester")
+  friendRequestsReceived Friendship[] @relation("FriendshipAddressee")
   role          UserRole       @default(MEMBER)
   analyticsEvents AnalyticsEvent[]
   sellerAiState    SellerAiState?
@@ -73,6 +75,24 @@ model ProfileSong {
 
   @@unique([userId, sortOrder])
   @@index([userId])
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  pairKey     String   @unique
+  requesterId String
+  addresseeId String
+  status      String   @default("pending")
+  respondedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@index([requesterId, status])
+  @@index([addresseeId, status])
+  @@index([status])
 }
 
 // A personal access token a seller generates so an external client — their

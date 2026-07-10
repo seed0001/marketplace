@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { friendPairKey, friendshipStateForViewer } from "@/lib/friends";
 
 /**
  * Everything the portfolio dashboard shows is derived here from the user's real
@@ -8,7 +9,7 @@ import { prisma } from "@/lib/prisma";
  * `includePrivate` adds owner-only analytics (who has been viewing their
  * listings), which is never exposed on the public profile.
  */
-export async function getPortfolio(userId: string, includePrivate = false) {
+export async function getPortfolio(userId: string, includePrivate = false, viewerId?: string | null) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -42,7 +43,8 @@ export async function getPortfolio(userId: string, includePrivate = false) {
     },
   });
 
-  const [feedbackAgg, reviewAgg, uniqueViewerRows, recentViews] = await Promise.all([
+  const activeViewerId = viewerId || (includePrivate ? userId : null);
+  const [feedbackAgg, reviewAgg, uniqueViewerRows, recentViews, acceptedFriendships, currentFriendship, pendingFriendRequests] = await Promise.all([
     // Feedback received acts as the transaction/"sale" record and the seller's
     // reputation score.
     prisma.feedback.aggregate({
@@ -71,6 +73,34 @@ export async function getPortfolio(userId: string, includePrivate = false) {
           include: {
             viewer: { select: { id: true, name: true, image: true } },
             listing: { select: { id: true, title: true } },
+          },
+        })
+      : Promise.resolve([]),
+    prisma.friendship.findMany({
+      where: {
+        status: "accepted",
+        OR: [{ requesterId: userId }, { addresseeId: userId }],
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 12,
+      include: {
+        requester: { select: { id: true, name: true, image: true, profileStatus: true } },
+        addressee: { select: { id: true, name: true, image: true, profileStatus: true } },
+      },
+    }),
+    activeViewerId && activeViewerId !== userId
+      ? prisma.friendship.findUnique({
+          where: { pairKey: friendPairKey(activeViewerId, userId) },
+          select: { id: true, requesterId: true, addresseeId: true, status: true },
+        })
+      : Promise.resolve(null),
+    includePrivate
+      ? prisma.friendship.findMany({
+          where: { addresseeId: userId, status: "pending" },
+          orderBy: { createdAt: "desc" },
+          take: 8,
+          include: {
+            requester: { select: { id: true, name: true, image: true, profileStatus: true } },
           },
         })
       : Promise.resolve([]),
@@ -105,6 +135,25 @@ export async function getPortfolio(userId: string, includePrivate = false) {
     },
     feedbackReceived,
     recentViews,
+    friends: acceptedFriendships.map((friendship) => {
+      const friend = friendship.requesterId === userId ? friendship.addressee : friendship.requester;
+      return {
+        friendshipId: friendship.id,
+        id: friend.id,
+        name: friend.name,
+        image: friend.image,
+        profileStatus: friend.profileStatus,
+      };
+    }),
+    pendingFriendRequests: pendingFriendRequests.map((friendship) => ({
+      friendshipId: friendship.id,
+      id: friendship.requester.id,
+      name: friendship.requester.name,
+      image: friendship.requester.image,
+      profileStatus: friendship.requester.profileStatus,
+    })),
+    currentViewerId: activeViewerId,
+    friendship: friendshipStateForViewer(currentFriendship, activeViewerId),
   };
 }
 

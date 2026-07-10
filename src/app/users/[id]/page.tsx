@@ -16,7 +16,7 @@ export default async function UserProfilePage(props: {
   const isOwner = session?.user?.id === id && search.view !== "public";
 
   // Owners get their private analytics even when landing on their public URL.
-  const data = await getPortfolio(id, isOwner);
+  const data = await getPortfolio(id, isOwner, session.user.id);
   if (!data) notFound();
 
   return <Portfolio data={data} isOwner={isOwner} />;
