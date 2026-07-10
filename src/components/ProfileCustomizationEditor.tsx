@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { profileThemes } from "@/lib/profile-customization";
 
@@ -22,6 +22,36 @@ type ProfileCustomization = {
 };
 
 const EMPTY_SONG: Song = { title: "", artist: "", url: "" };
+const PROFILE_IMAGE_MAX_WIDTH = 1800;
+const JPEG_QUALITY = 0.82;
+
+function compressProfileImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, PROFILE_IMAGE_MAX_WIDTH / img.width);
+      const width = Math.max(1, Math.round(img.width * scale));
+      const height = Math.max(1, Math.round(img.height * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas not supported"));
+      ctx.fillStyle = "#111827";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image"));
+    };
+    img.src = url;
+  });
+}
 
 export function ProfileCustomizationEditor({
   initialProfile,
@@ -29,6 +59,8 @@ export function ProfileCustomizationEditor({
   initialProfile: ProfileCustomization;
 }) {
   const router = useRouter();
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState(false);
   const [bio, setBio] = useState(initialProfile.profileBio || "");
   const [status, setStatus] = useState(initialProfile.profileStatus || "");
@@ -38,6 +70,7 @@ export function ProfileCustomizationEditor({
   const [theme, setTheme] = useState(initialProfile.profileTheme || "midnight");
   const [songs, setSongs] = useState<Song[]>(initialProfile.profileSongs);
   const [saving, setSaving] = useState(false);
+  const [processingImage, setProcessingImage] = useState<"cover" | "background" | null>(null);
   const [message, setMessage] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
   function updateSong(index: number, field: keyof Song, value: string) {
@@ -46,6 +79,24 @@ export function ProfileCustomizationEditor({
         songIndex === index ? { ...song, [field]: value } : song,
       ),
     );
+  }
+
+  async function handleImageFile(file: File, target: "cover" | "background") {
+    setMessage(null);
+    if (!file.type.startsWith("image/")) {
+      setMessage({ kind: "error", text: "Choose an image file." });
+      return;
+    }
+    setProcessingImage(target);
+    try {
+      const dataUrl = await compressProfileImage(file);
+      if (target === "cover") setCoverImage(dataUrl);
+      else setBackgroundImage(dataUrl);
+    } catch {
+      setMessage({ kind: "error", text: "Could not read that image. Try a JPG or PNG." });
+    } finally {
+      setProcessingImage(null);
+    }
   }
 
   function reset() {
@@ -153,24 +204,94 @@ export function ProfileCustomizationEditor({
             ))}
           </select>
         </label>
-        <label className="text-xs font-medium text-zinc-400">
-          Cover image URL
+        <div className="text-xs font-medium text-zinc-400">
+          Cover image
+          <div className="mt-1.5 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+            <div className="flex h-32 items-center justify-center bg-zinc-950/60">
+              {coverImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={coverImage} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-xs text-zinc-600">No cover image</span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 p-3">
+              <button
+                type="button"
+                onClick={() => coverInputRef.current?.click()}
+                disabled={Boolean(processingImage)}
+                className="rounded-full border border-emerald-500/40 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50"
+              >
+                {processingImage === "cover" ? "Preparing..." : coverImage ? "Change cover" : "Choose file"}
+              </button>
+              {coverImage && (
+                <button
+                  type="button"
+                  onClick={() => setCoverImage("")}
+                  disabled={Boolean(processingImage)}
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400 hover:text-red-300 disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
           <input
-            value={coverImage}
-            onChange={(event) => setCoverImage(event.target.value)}
-            placeholder="https://..."
-            className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+            ref={coverInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void handleImageFile(file, "cover");
+              event.target.value = "";
+            }}
           />
-        </label>
-        <label className="text-xs font-medium text-zinc-400">
-          Background image URL
+        </div>
+        <div className="text-xs font-medium text-zinc-400">
+          Background image
+          <div className="mt-1.5 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+            <div className="flex h-32 items-center justify-center bg-zinc-950/60">
+              {backgroundImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={backgroundImage} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-xs text-zinc-600">No background image</span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 p-3">
+              <button
+                type="button"
+                onClick={() => backgroundInputRef.current?.click()}
+                disabled={Boolean(processingImage)}
+                className="rounded-full border border-emerald-500/40 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50"
+              >
+                {processingImage === "background" ? "Preparing..." : backgroundImage ? "Change background" : "Choose file"}
+              </button>
+              {backgroundImage && (
+                <button
+                  type="button"
+                  onClick={() => setBackgroundImage("")}
+                  disabled={Boolean(processingImage)}
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-zinc-400 hover:text-red-300 disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
           <input
-            value={backgroundImage}
-            onChange={(event) => setBackgroundImage(event.target.value)}
-            placeholder="https://..."
-            className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+            ref={backgroundInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void handleImageFile(file, "background");
+              event.target.value = "";
+            }}
           />
-        </label>
+        </div>
         <label className="text-xs font-medium text-zinc-400">
           Accent color
           <div className="mt-1.5 flex rounded-lg border border-white/10 bg-black/20 p-1 focus-within:border-emerald-500">
@@ -268,7 +389,7 @@ export function ProfileCustomizationEditor({
         <button
           type="button"
           onClick={save}
-          disabled={saving}
+          disabled={saving || Boolean(processingImage)}
           className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save profile"}
@@ -276,7 +397,7 @@ export function ProfileCustomizationEditor({
         <button
           type="button"
           onClick={reset}
-          disabled={saving}
+          disabled={saving || Boolean(processingImage)}
           className="rounded-full border border-border px-5 py-2 text-sm text-zinc-400 hover:text-white"
         >
           Cancel

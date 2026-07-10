@@ -181,6 +181,17 @@ export async function Portfolio({
       </div>
 
       {isOwner && (
+        <div className="mb-6 flex justify-end">
+          <Link
+            href={`/users/${user.id}?view=public`}
+            className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-300"
+          >
+            View as visitor
+          </Link>
+        </div>
+      )}
+
+      {isOwner && (
         <ProfileCustomizationEditor
           initialProfile={{
             profileBio: user.profileBio,
