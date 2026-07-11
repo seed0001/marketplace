@@ -59,11 +59,11 @@ function ProfileSongs({
     <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Favorite songs</h2>
-          <p className="mt-1 text-sm text-zinc-500">A five-song profile playlist.</p>
+          <h2 className="text-lg font-semibold">Top 5 songs</h2>
+          <p className="mt-1 text-sm text-zinc-500">The profile playlist visitors see first.</p>
         </div>
         <span className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-black" style={{ backgroundColor: accentColor }}>
-          Profile radio
+          Playlist
         </span>
       </div>
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -173,6 +173,25 @@ function PendingFriendRequests({
   );
 }
 
+function OwnerToolsIntro({ userId }: { userId: string }) {
+  return (
+    <section className="mb-6 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Profile controls</h2>
+          <p className="mt-1 text-sm text-zinc-500">Owner-only settings for appearance, music, and notification contact info.</p>
+        </div>
+        <Link
+          href={`/users/${userId}?view=public`}
+          className="shrink-0 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-300"
+        >
+          View as visitor
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 export async function Portfolio({
   data,
   isOwner,
@@ -262,41 +281,6 @@ export async function Portfolio({
         </div>
       </div>
 
-      {isOwner && (
-        <div className="mb-6 flex justify-end">
-          <Link
-            href={`/users/${user.id}?view=public`}
-            className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-sm font-medium text-zinc-300 hover:border-emerald-400/40 hover:text-emerald-300"
-          >
-            View as visitor
-          </Link>
-        </div>
-      )}
-
-      {isOwner && (
-        <ProfileCustomizationEditor
-          initialProfile={{
-            profileBio: user.profileBio,
-            profileStatus: user.profileStatus,
-            profileCoverImage: user.profileCoverImage,
-            profileBackgroundImage: user.profileBackgroundImage,
-            profileAccentColor: user.profileAccentColor,
-            profileTheme: user.profileTheme,
-            profileSongs: user.profileSongs,
-          }}
-        />
-      )}
-
-      {isOwner && (
-        <ProfileContactSettings
-          initialPhoneNumber={user.phoneNumber}
-          initialPhoneCarrier={user.phoneCarrier}
-          initialPhoneNotificationsEnabled={user.phoneNotificationsEnabled}
-          initialEmailNotificationsEnabled={user.emailNotificationsEnabled}
-          gateways={smsGateways}
-        />
-      )}
-
       {isOwner && <PendingFriendRequests requests={data.pendingFriendRequests} />}
 
       <ProfileSongs songs={user.profileSongs} accentColor={accentColor} />
@@ -362,6 +346,30 @@ export async function Portfolio({
           sub={stats.reviewsAvg != null ? `${stats.reviewsAvg.toFixed(1)} avg rating` : "No reviews yet"}
         />
       </div>
+
+      {isOwner && (
+        <>
+          <OwnerToolsIntro userId={user.id} />
+          <ProfileCustomizationEditor
+            initialProfile={{
+              profileBio: user.profileBio,
+              profileStatus: user.profileStatus,
+              profileCoverImage: user.profileCoverImage,
+              profileBackgroundImage: user.profileBackgroundImage,
+              profileAccentColor: user.profileAccentColor,
+              profileTheme: user.profileTheme,
+              profileSongs: user.profileSongs,
+            }}
+          />
+          <ProfileContactSettings
+            initialPhoneNumber={user.phoneNumber}
+            initialPhoneCarrier={user.phoneCarrier}
+            initialPhoneNotificationsEnabled={user.phoneNotificationsEnabled}
+            initialEmailNotificationsEnabled={user.emailNotificationsEnabled}
+            gateways={smsGateways}
+          />
+        </>
+      )}
 
       {/* Owner-only audience analytics */}
       {isOwner && (

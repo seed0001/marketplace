@@ -143,7 +143,7 @@ export function ProfileCustomizationEditor({
 
   if (!editing) {
     return (
-      <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+      <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold">Edit profile vibe</h2>
@@ -173,7 +173,7 @@ export function ProfileCustomizationEditor({
   }
 
   return (
-    <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+    <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
       <div>
         <h2 className="text-lg font-semibold">Profile vibe</h2>
         <p className="mt-1 text-sm leading-6 text-zinc-500">
@@ -398,7 +398,7 @@ export function ProfileCustomizationEditor({
           type="button"
           onClick={reset}
           disabled={saving || Boolean(processingImage)}
-          className="rounded-full border border-border px-5 py-2 text-sm text-zinc-400 hover:text-white"
+          className="rounded-full border border-white/10 px-5 py-2 text-sm text-zinc-400 hover:text-white"
         >
           Cancel
         </button>

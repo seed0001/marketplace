@@ -79,7 +79,7 @@ export function ProfileContactSettings({
   }
 
   return (
-    <section className="mb-12 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+    <section className="mb-12 rounded-2xl border border-white/15 bg-black/45 p-5 shadow-xl shadow-black/20 backdrop-blur-md sm:p-6">
       <h2 className="text-lg font-semibold">Contact and notifications</h2>
       <p className="mt-1 text-sm leading-6 text-zinc-500">
         Choose how staff alerts reach you. Email alerts go to your account email so they can land on your phone&apos;s mail app. Your phone number is never shown publicly.
